@@ -10,7 +10,7 @@ const PostsController = require('../controllers/posts.js')
  * @apiGroup Posts
  *
  * @apiSuccess (Success 200) {String} message Success message
- * @apiSuccess (Success 200) {Object[]} data
+ * @apiSuccess (Success 200) {Object} data
  * @apiSuccess (Success 200) {String} data.count Count of posts
  *
  * @apiUse ErrorObject
