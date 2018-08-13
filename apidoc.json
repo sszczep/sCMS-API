@@ -1,0 +1,8 @@
+{
+  "name": "sCMS API",
+  "description": "API for sCMS",
+  "url": "https://domain.com",
+  "template": {
+    "forceLanguage": "en"
+  }
+}
