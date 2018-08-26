@@ -1,38 +1,36 @@
+'use strict';
+
 const OptionModel = require('../models/options.js');
 
-async function getOption(key) {
-  return await OptionModel
+const getOption = async key =>
+  await OptionModel
     .findOne({ key })
     .select('key value')
     .lean()
-    .exec()
-}
+    .exec();
 
-async function getOptions() {
-  return await OptionModel
+const getOptions = async() =>
+  await OptionModel
     .find()
     .select('key value')
     .lean()
-    .exec()
-}
+    .exec();
 
-async function createOption(data) {
-  const newOption = new OptionModel(data);
-  return await newOption.save();
-}
+const createOption = async data =>
+  await OptionModel
+    .create(data)
+    .exec();
 
-async function updateOption(data) {
-  return await OptionModel
+const updateOption = async data =>
+  await OptionModel
     .findOneAndUpdate({ key: data.key }, { key: data.newKey, value: data.newValue }, { new: true, runValidators: true })
     .select('key value')
-    .exec()
-}
+    .exec();
 
-async function deleteOption(key) {
-  return await OptionModel
+const deleteOption = async key =>
+  await OptionModel
     .findOneAndRemove({ key })
-    .exec()
-}
+    .exec();
 
 module.exports = {
   getOption,
@@ -40,4 +38,4 @@ module.exports = {
   createOption,
   updateOption,
   deleteOption
-}
+};

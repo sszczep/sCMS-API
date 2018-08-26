@@ -1,8 +1,10 @@
+'use strict';
+
 const express = require('express');
 const router = express.Router();
 const CustomError = require('../utils/CustomError.js');
 
-const PostsController = require('../controllers/posts.js')
+const PostsController = require('../controllers/posts.js');
 
 /**
  * @api {get} /posts/count Get count of all posts
@@ -15,27 +17,28 @@ const PostsController = require('../controllers/posts.js')
  * @apiUse ErrorObject
  */
 
-router.get('/count', async (req, res, next) => {
+router.get('/count', async(req, res, next) => {
   try {
-    const data = await PostsController.getPostsCount()
+    const count = await PostsController.getPostsCount();
+
     return res
       .status(200)
       .json({
         data: {
           count
         }
-      })
-  } catch(err) {
-    return next(err)
+      });
+  } catch (err) {
+    return next(err);
   }
-})
+});
 
 /**
- * @api {get} /posts/:_id Get a single post
+ * @api {get} /posts/:id Get a single post
  * @apiName GetPost
  * @apiGroup Posts
  *
- * @apiParam (Route Parameter) {String} _id _id of post to return
+ * @apiParam (Route Parameter) {String} id id of post to return
  *
  * @apiSuccess (Success 200) {Object} data
  * @apiSuccess (Success 200) {String} data.title Title of post
@@ -49,25 +52,25 @@ router.get('/count', async (req, res, next) => {
  * @apiUse ErrorObject
  */
 
-router.get('/:_id', async (req, res, next) => {
-  const _id = req.params._id;
+router.get('/:_id', async(req, res, next) => {
+  const id = req.params.id;
 
   try {
-    const data = await PostsController.getSinglePost(_id)
+    const data = await PostsController.getSinglePost(id);
 
-    if(!data) {
-      throw new CustomError('NoPostFound', 'Couldn\'t find post with given id', 404)
+    if (!data) {
+      throw new CustomError('NoPostFound', 'Couldn\'t find post with given id', 404);
     }
 
     return res
       .status(200)
       .json({
         data
-      })
-  } catch(err) {
-    return next(err)
+      });
+  } catch (err) {
+    return next(err);
   }
-})
+});
 
 /**
  * @api {get} /posts?preview=:preview&limit=:limit&offset=:offset Get list of all posts
@@ -90,23 +93,23 @@ router.get('/:_id', async (req, res, next) => {
  * @apiUse ErrorObject
  */
 
-router.get('/', async (req, res, next) => {
+router.get('/', async(req, res, next) => {
   try {
     const data = await PostsController.getPostsList({
-      preview: req.query.preview === "true" ? true : false,
+      preview: req.query.preview === 'true',
       limit: req.query.limit || 0,
       offset: req.query.offset || 0
-    })
+    });
 
     return res
       .status(200)
       .json({
         data
-      })
-  } catch(err) {
-    return next(err)
+      });
+  } catch (err) {
+    return next(err);
   }
-})
+});
 
 /**
  * @api {post} /posts Create new post
@@ -131,18 +134,18 @@ router.get('/', async (req, res, next) => {
  * @apiUse ErrorObject
  */
 
-router.post('/', async (req, res, next) => {
+router.post('/', async(req, res, next) => {
   try {
-    const data = await PostsController.createNewPost(req.body)
+    const data = await PostsController.createNewPost(req.body);
 
     return res
       .status(201)
       .json({
         data
-      })
-  } catch(err) {
-    return next(err)
+      });
+  } catch (err) {
+    return next(err);
   }
-})
+});
 
 module.exports = router;

@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const router = express.Router();
 const CustomError = require('../utils/CustomError.js');
@@ -20,33 +22,34 @@ const PostsController = require('../controllers/posts.js');
  * @apiUse ErrorObject
  */
 
-router.get('/:phrase?', async (req, res, next) => {
+router.get('/:phrase?', async(req, res, next) => {
   try {
-    const phrase = req.params.phrase
+    const phrase = req.params.phrase;
 
-    if(!phrase || phrase.length < 3) {
-      return next(new CustomError('PhraseTooShort', 'Searching phrase must be at least 3 characters long!', 400))
+    if (!phrase || phrase.length < 3) {
+      return next(new CustomError('PhraseTooShort', 'Searching phrase must be at least 3 characters long!', 400));
     }
 
     const data = await PostsController.findContaining(phrase);
-    let results = [];
-    for(let item of data) {
+    const results = [];
+
+    for (const item of data) {
       results.push({
         name: item.title,
         subtext: item.previewText,
         avatar: item.thumbnail,
         url: item.friendlyUrl
-      })
+      });
     }
 
     return res
       .status(200)
       .json({
         data: results
-      })
-  } catch(err) {
-    return next(err)
+      });
+  } catch (err) {
+    return next(err);
   }
-})
+});
 
 module.exports = router;

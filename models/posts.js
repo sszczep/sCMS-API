@@ -1,4 +1,6 @@
-const mongoose = require('../database')
+'use strict';
+
+const mongoose = require('../database');
 
 const Post = new mongoose.Schema({
   title: {
@@ -31,6 +33,6 @@ const Post = new mongoose.Schema({
     required: true,
     unique: true
   }
-})
+});
 
-module.exports = mongoose.model("Post", Post)
+module.exports = mongoose.model('Post', Post);

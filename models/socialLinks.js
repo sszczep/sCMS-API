@@ -1,4 +1,6 @@
-const mongoose = require('../database')
+'use strict';
+
+const mongoose = require('../database');
 
 const SocialLink = new mongoose.Schema({
   name: {
@@ -14,6 +16,6 @@ const SocialLink = new mongoose.Schema({
     type: String,
     required: true
   }
-})
+});
 
-module.exports = mongoose.model("SocialLink", SocialLink)
+module.exports = mongoose.model('SocialLink', SocialLink);

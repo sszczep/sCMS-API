@@ -1,26 +1,21 @@
+'use strict';
+
 const mongoose = require('mongoose');
-const logger = require('../logger.js')
+const logger = require('../logger.js');
+const { database: options } = require('../config.js');
 
-const options = {
-  address: process.env.DATABASE_ADDRESS || 'localhost:27017/blog',
-  user: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD
-}
-
-mongoose.connect(`mongodb://${options.address}`, { useNewUrlParser: true });
+mongoose.connect(`mongodb://${options.url}`, { useNewUrlParser: true });
 
 mongoose.connection.on('connected', () => {
-  logger.info('Mongoose successfully connected')
-})
+  logger.info('Mongoose successfully connected');
+});
 
 mongoose.connection.on('error', err => {
-  logger.error(`Mongoose error: ${err}`)
-  process.exit(1)
-})
+  throw err;
+});
 
 mongoose.connection.on('disconnected', () => {
-  logger.error('Mongoose disconnected! Check if your mongodb is running')
-  process.exit(1)
-})
+  throw new Error('Mongoose disconnected! Check if your mongodb is running');
+});
 
 module.exports = mongoose;

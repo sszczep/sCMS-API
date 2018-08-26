@@ -1,46 +1,37 @@
+'use strict';
+
 const PostModel = require('../models/posts.js');
 const slugify = require('slugify');
 
-async function findContaining(phrase) {
-  return await PostModel
-    .find({ 'title': { '$regex': phrase, '$options': 'i' } })
+const findContaining = async phrase =>
+  await PostModel
+    .find({ title: { $regex: phrase, $options: 'i' }})
     .select('friendlyUrl title thumbnail previewText')
     .lean()
-    .exec()
-}
+    .exec();
 
-async function createNewPost(data) {
-  const date = new Date();
+const createNewPost = async data => {
+  const friendlyTitle = slugify(data.title, { lower: true });
 
-  let month = date.getMonth() + 1;
-  if(month < 10) month = `0${month}`;
+  data.friendlyUrl = data.friendlyUrl || `post/${friendlyTitle}`;
 
-  const year = date.getFullYear();
-
-  const friendlyTitle = slugify(data.title, {
-    lower: true
-  });
-
-  data.friendlyUrl = data.friendlyUrl || `${year}-${month}/${friendlyTitle}`;
-
-  const newPost = new PostModel(data);
-  return await newPost.save();
-}
-
-async function getPostsCount() {
-  return await PostModel.estimatedDocumentCount()
-}
-
-async function getSinglePost(_id) {
   return await PostModel
-    .findOne({ _id })
-    .lean()
-    .exec()
-}
+    .create(data)
+    .exec();
+};
 
-async function getPostsList(params) {
-  const limit = parseInt(params.limit) || 0;
-  const offset = parseInt(params.offset) || 0;
+const getPostsCount = async() =>
+  await PostModel.estimatedDocumentCount();
+
+const getSinglePost = async id =>
+  await PostModel
+    .findOne({ _id: id })
+    .lean()
+    .exec();
+
+const getPostsList = async params => {
+  const limit = Number(params.limit) || 0;
+  const offset = Number(params.offset) || 0;
 
   return await PostModel
     .find()
@@ -49,8 +40,8 @@ async function getPostsList(params) {
     .sort('-created')
     .select(`-__v ${params.preview ? '-content' : ''}`)
     .lean()
-    .exec()
-}
+    .exec();
+};
 
 module.exports = {
   findContaining,
@@ -58,4 +49,4 @@ module.exports = {
   getPostsCount,
   getSinglePost,
   getPostsList
-}
+};

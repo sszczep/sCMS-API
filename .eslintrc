@@ -1,0 +1,14 @@
+{
+  "extends": "es/2015/server",
+  "rules": {
+    "space-before-function-paren": ["error", "never"],
+    "dot-location": ["error", "property"],
+    "new-cap": [ 2, {
+      newIsCap: true,
+      capIsNew: true,
+      newIsCapExceptions: [],
+      capIsNewExceptions: ["Router"],
+      properties: true
+    }],
+  }
+}

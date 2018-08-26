@@ -1,19 +1,20 @@
-const SocialModel = require('../models/socials.js');
+'use strict';
 
-async function getSocials() {
-  return await SocialModel
+const SocialLinksModel = require('../models/socialLinks.js');
+
+const getSocialLinks = async() =>
+  await SocialLinksModel
     .find()
     .select(`-__v`)
     .lean()
-    .exec()
-}
+    .exec();
 
-async function createSocial(data) {
-  const newSocial = new SocialModel(data);
-  return await newSocial.save();
-}
+const createSocialLink = async data =>
+  await SocialLinksModel
+    .create(data)
+    .exec();
 
 module.exports = {
-  getSocials,
-  createSocial
-}
+  getSocialLinks,
+  createSocialLink
+};

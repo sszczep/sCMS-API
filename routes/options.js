@@ -1,8 +1,10 @@
+'use strict';
+
 const express = require('express');
 const router = express.Router();
-const CustomError = require('../utils/CustomError.js')
+const CustomError = require('../utils/CustomError.js');
 
-const OptionsController = require('../controllers/options.js')
+const OptionsController = require('../controllers/options.js');
 
 /**
  * @api {get} /options Get list of all options
@@ -16,18 +18,19 @@ const OptionsController = require('../controllers/options.js')
  * @apiUse ErrorObject
  */
 
-router.get('/', async (req, res, next) => {
+router.get('/', async(req, res, next) => {
   try {
     const data = await OptionsController.getOptions();
+
     return res
       .status(200)
       .json({
         data
-      })
-  } catch(err) {
-    return next(err)
+      });
+  } catch (err) {
+    return next(err);
   }
-})
+});
 
 /**
  * @api {post} /options Create new option
@@ -44,20 +47,21 @@ router.get('/', async (req, res, next) => {
  * @apiUse ErrorObject
  */
 
-router.post('/', async (req, res, next) => {
+router.post('/', async(req, res, next) => {
   const body = req.body;
 
   try {
     const data = await OptionsController.createOption(body);
+
     return res
       .status(201)
       .json({
         data
-      })
-  } catch(err) {
-    return next(err)
+      });
+  } catch (err) {
+    return next(err);
   }
-})
+});
 
 /**
  * @api {get} /options/:key Get single option
@@ -73,22 +77,25 @@ router.post('/', async (req, res, next) => {
  * @apiUse ErrorObject
  */
 
-router.get('/:key', async (req, res, next) => {
+router.get('/:key', async(req, res, next) => {
   const key = req.params.key;
 
   try {
     const data = await OptionsController.getOption(key);
-    if(!data) throw(new HTTPError('NoOptionFound', 'Couldn\'t find option with given name', 404))
+
+    if (!data) {
+      throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
+    }
 
     return res
       .status(200)
       .json({
         data
-      })
-  } catch(err) {
-    return next(err)
+      });
+  } catch (err) {
+    return next(err);
   }
-})
+});
 
 /**
  * @api {put} /options/:key Update single option
@@ -106,25 +113,29 @@ router.get('/:key', async (req, res, next) => {
  * @apiUse ErrorObject
  */
 
-router.put('/:key', async (req, res, next) => {
+router.put('/:key', async(req, res, next) => {
   const obj = {
     key: req.params.key,
     newKey: req.body.newKey,
     newValue: req.body.newValue
-  }
+  };
 
   try {
     const data = await OptionsController.updateOption(obj);
-    if(!data) throw(new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404))
+
+    if (!data) {
+      throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
+    }
+
     return res
       .status(200)
       .json({
         data
-      })
-  } catch(err) {
-    return next(err)
+      });
+  } catch (err) {
+    return next(err);
   }
-})
+});
 
 /**
  * @api {delete} /options/:key Delete single option
@@ -138,16 +149,20 @@ router.put('/:key', async (req, res, next) => {
  * @apiUse ErrorObject
  */
 
-router.delete('/:key', async (req, res, next) => {
+router.delete('/:key', async(req, res, next) => {
   const key = req.params.key;
 
   try {
     const data = await OptionsController.deleteOption(key);
-    if(!data) throw(new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404))
-    return res.sendStatus(200)
-  } catch(err) {
-    return next(err)
+
+    if (!data) {
+      throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
+    }
+
+    return res.sendStatus(200);
+  } catch (err) {
+    return next(err);
   }
-})
+});
 
 module.exports = router;

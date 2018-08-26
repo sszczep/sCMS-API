@@ -18,5 +18,9 @@
     "slugify": "^1.3.0",
     "winston": "^3.0.0",
     "winston-daily-rotate-file": "^3.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.4.0",
+    "eslint-config-es": "^0.9.1"
   }
 }

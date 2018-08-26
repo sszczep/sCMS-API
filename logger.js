@@ -1,42 +1,64 @@
-const winston = require('winston')
-require('winston-daily-rotate-file')
+'use strict';
 
-let logger = winston.createLogger({
+const winston = require('winston');
+const { env } = require('./config.js');
+
+require('winston-daily-rotate-file');
+
+const transports = {
+  file: new winston.transports.DailyRotateFile({
+    level: env === 'development' ? 'debug' : 'info',
+    filename: '%DATE%.log',
+    dirname: 'logs',
+    dataPattern: 'yyyy-MM',
+    prepend: true,
+
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.printf(info => {
+        const { level, timestamp, message } = info;
+
+        return JSON.stringify({ level, timestamp, message });
+      })
+    )
+  }),
+
+  console: new winston.transports.Console({
+    level: 'debug',
+
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.colorize(),
+      winston.format.printf(info => {
+        const dateObj = new Date(info.timestamp);
+        const timestamp = dateObj.toLocaleString();
+
+        return `[${info.level}] [${timestamp}] ${info.message}`;
+      })
+    )
+  })
+};
+
+const logger = winston.createLogger({
   transports: [
-    new winston.transports.Console({
-      level: 'debug',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.colorize(),
-        winston.format.printf(info => {
-          const dateObj = new Date(info.timestamp);
-          const timestamp = dateObj.toLocaleString()
-          return `[${info.level}] [${timestamp}] ${info.message}`
-        })
-      )
-    }),
-    new winston.transports.DailyRotateFile({
-      level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
-      filename: '%DATE%.log',
-      dirname: 'logs',
-      dataPattern: 'yyyy-MM',
-      prepend: true,
-
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.printf(info => {
-          const obj = { level, timestamp, message } = info
-          return JSON.stringify(obj);
-        })
-      )
-    })
+    transports.file,
+    transports.console
   ]
 });
 
 logger.stream = {
-  write: (message, encoding) => {
-    logger.info(message)
+  write: message => {
+    logger.info(message);
   }
-}
+};
 
-module.exports = logger
+logger.logAndExit = (level, message, exitCode) => {
+  logger.log(level, message);
+  logger.end();
+
+  transports.file.on('finish', () => {
+    process.exit(exitCode); // eslint-disable-line no-process-exit
+  });
+};
+
+module.exports = logger;

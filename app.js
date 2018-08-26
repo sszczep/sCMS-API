@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -8,7 +10,9 @@ const CustomError = require('./utils/CustomError.js');
 
 const logger = require('./logger.js');
 
-app.use(morgan('dev', { stream: logger.stream }))
+const { port } = require('./config.js');
+
+app.use(morgan('dev', { stream: logger.stream }));
 
 app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,23 +20,21 @@ app.use(bodyParser.json());
 
 app.use(cors('*'));
 
-/* ROUTES */
-
 // autoload routes
 
-const fs = require('fs')
-const path = require('path')
+const fs = require('fs');
+const path = require('path');
 const routesPath = path.join(__dirname, 'routes');
 
-fs.readdirSync(routesPath).forEach(file => {
-  app.use(`/${file.split('.')[0]}`, require(path.join(routesPath, file)));
-})
+fs.readdirSync(routesPath).forEach(file => { // eslint-disable-line no-sync
+  app.use(`/${file.split('.')[0]}`, require(path.join(routesPath, file))); // eslint-disable-line global-require
+});
 
 // when route doesn't exist
 
 app.use((req, res, next) => {
   next(new CustomError('NotFound', 'Page not found', 404));
-})
+});
 
 // error handling
 
@@ -44,14 +46,16 @@ app.use((req, res, next) => {
  * @apiError (Error 4xx/5xx) {String} error.message Error detailed message
  */
 
-app.use((error, req, res, next) => {
-  if(!error.status) {
-    switch(error.name) {
+app.use((error, req, res, next) => { // eslint-disable-line no-unused-vars
+  if (!error.status) {
+    switch (error.name) {
       case 'ValidationError':
         error.status = 400;
         break;
       case 'MongoError':
-        if(error.code == 11000) error.status = 409;
+        if (error.code === 11000) {
+          error.status = 409;
+        }
         break;
       default:
         error.status = 500;
@@ -65,12 +69,17 @@ app.use((error, req, res, next) => {
         name: error.name,
         message: error.message
       }
-    })
-})
+    });
+});
 
-/* LISTEN ON GIVEN PORT */
+// listen on given port
 
-const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  logger.info(`Server is up and running on port ${port}`)
+  logger.info(`Server is up and running on port ${port}`);
+});
+
+// handle uncaught exceptions (log to transporters and then kill process)
+
+process.on('uncaughtException', err => {
+  logger.logAndExit('error', err.message, 1);
 });

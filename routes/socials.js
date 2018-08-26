@@ -1,7 +1,9 @@
+'use strict';
+
 const express = require('express');
 const router = express.Router();
 
-const SocialsController = require('../controllers/socials.js')
+const SocialsController = require('../controllers/socials.js');
 
 /**
  * @api {get} /socials Get list of social links
@@ -16,18 +18,19 @@ const SocialsController = require('../controllers/socials.js')
  * @apiUse ErrorObject
  */
 
-router.get('/', async (req, res, next) => {
+router.get('/', async(req, res, next) => {
   try {
-    const data = await SocialsController.getSocials()
+    const data = await SocialsController.getSocialLinks();
+
     return res
       .status(200)
       .json({
         data
-      })
-  } catch(err) {
-    return next(err)
+      });
+  } catch (err) {
+    return next(err);
   }
-})
+});
 
 /**
  * @api {post} /socials Create new social link
@@ -42,17 +45,18 @@ router.get('/', async (req, res, next) => {
  * @apiUse ErrorObject
  */
 
-router.post('/', async (req, res, next) => {
+router.post('/', async(req, res, next) => {
   try {
-     const data = await SocialsController.createSocial(req.body)
-     return res
-       .status(201)
-       .json({
-         data
-       })
-  } catch(err) {
-    return next(err)
+    const data = await SocialsController.createSocialLink(req.body);
+
+    return res
+      .status(201)
+      .json({
+        data
+      });
+  } catch (err) {
+    return next(err);
   }
-})
+});
 
 module.exports = router;

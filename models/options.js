@@ -1,4 +1,6 @@
-const mongoose = require('../database')
+'use strict';
+
+const mongoose = require('../database');
 
 const Option = new mongoose.Schema({
   key: {
@@ -10,6 +12,6 @@ const Option = new mongoose.Schema({
     type: String,
     required: true
   }
-})
+});
 
-module.exports = mongoose.model("Option", Option)
+module.exports = mongoose.model('Option', Option);
