@@ -9,7 +9,6 @@ const PagesController = require('../controllers/pages.js')
  * @apiName GetPages
  * @apiGroup Pages
  *
- * @apiSuccess (Success 200) {String} message Success message
  * @apiSuccess (Success 200) {Object[]} data Array of pages
  * @apiSuccess (Success 200) {String} data.name Name of pages
  * @apiSuccess (Success 200) {String} data.url Url of pages
@@ -23,7 +22,6 @@ router.get('/', async (req, res, next) => {
     return res
       .status(200)
       .json({
-        message: "Successfully received list of all pages",
         data
       })
   } catch(err) {
@@ -39,7 +37,6 @@ router.get('/', async (req, res, next) => {
  * @apiParam (JSON Payload) {String} name Name of page
  * @apiParam (JSON Payload) {String} url Url of page
  *
- * @apiSuccess (Success 201) {String} message Success message
  * @apiSuccess (Success 201) {Object} data Newly created page
  * @apiSuccess (Success 201) {String} data.name Name of page
  * @apiSuccess (Success 201) {String} data.url Url of page
@@ -55,7 +52,6 @@ router.post('/', async (req, res, next) => {
     return res
       .status(201)
       .json({
-        message: "Successfully created new page",
         data
       })
   } catch(err) {
@@ -72,7 +68,6 @@ router.post('/', async (req, res, next) => {
  * @apiParam (JSON Payload) {String} newName New name of page
  * @apiParam (JSON Payload) {String} newUrl New url of page
  *
- * @apiSuccess (Success 200) {String} message Success message
  * @apiSuccess (Success 200) {Object} data Object of updated page
  * @apiSuccess (Success 200) {String} data.name New name of page
  * @apiSuccess (Success 200) {String} data.url New url of page
@@ -93,7 +88,6 @@ router.put('/:name', async (req, res, next) => {
     return res
       .status(200)
       .json({
-        message: "Successfully changed option value",
         data
       })
   } catch(err) {
@@ -108,7 +102,7 @@ router.put('/:name', async (req, res, next) => {
  *
  * @apiParam (Route Parameter) {String} name Name of page
  *
- * @apiSuccess (Success 200) {String} message Success message
+ * @apiSuccess (Success 200) {null} null No response data
  *
  * @apiUse ErrorObject
  */
@@ -119,11 +113,7 @@ router.delete('/:name', async (req, res, next) => {
   try {
     const data = await PagesController.deletePage(name);
     if(!data) throw(new CustomError('NoPageFound', 'No page with given name', 404))
-    return res
-      .status(200)
-      .json({
-        message: "Successfully deleted page"
-      })
+    return res.sendStatus(200)
   } catch(err) {
     return next(err)
   }

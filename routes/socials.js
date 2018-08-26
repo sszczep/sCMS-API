@@ -8,7 +8,6 @@ const SocialsController = require('../controllers/socials.js')
  * @apiName GetSocialLinks
  * @apiGroup SocialLinks
  *
- * @apiSuccess (Success 200) {String} message Success message
  * @apiSuccess (Success 200) {Object[]} data Array of social links
  * @apiSuccess (Success 200) {String} data.name Name of social link
  * @apiSuccess (Success 200) {String} data.url Url of social link
@@ -23,7 +22,6 @@ router.get('/', async (req, res, next) => {
     return res
       .status(200)
       .json({
-        message: "Successfully received list of social links",
         data
       })
   } catch(err) {
@@ -36,7 +34,6 @@ router.get('/', async (req, res, next) => {
  * @apiName CreateSocialLink
  * @apiGroup SocialLinks
  *
- * @apiSuccess (Success 201) {String} message Success message
  * @apiSuccess (Success 201) {Object} data
  * @apiSuccess (Success 201) {String} data.name Name of social link
  * @apiSuccess (Success 201) {String} data.url Url of social link
@@ -51,7 +48,6 @@ router.post('/', async (req, res, next) => {
      return res
        .status(201)
        .json({
-         message: "Successfully created new social link",
          data
        })
   } catch(err) {

@@ -11,7 +11,6 @@ const PostsController = require('../controllers/posts.js');
  *
  * @apiParam (Route Parameter) {String{3..}} phrase Phrase to look for
  *
- * @apiSuccess (Success 200) {String} message Success message
  * @apiSuccess (Success 200) {Object[]} data Array of entries
  * @apiSuccess (Success 200) {String} data.name Name of entry
  * @apiSuccess (Success 200) {String} data.subtext Subtext of entry
@@ -43,7 +42,6 @@ router.get('/:phrase?', async (req, res, next) => {
     return res
       .status(200)
       .json({
-        message: "Successfully received list of entries containing given phrase",
         data: results
       })
   } catch(err) {

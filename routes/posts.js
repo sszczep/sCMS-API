@@ -9,7 +9,6 @@ const PostsController = require('../controllers/posts.js')
  * @apiName GetPostsCount
  * @apiGroup Posts
  *
- * @apiSuccess (Success 200) {String} message Success message
  * @apiSuccess (Success 200) {Object} data
  * @apiSuccess (Success 200) {String} data.count Count of posts
  *
@@ -22,7 +21,6 @@ router.get('/count', async (req, res, next) => {
     return res
       .status(200)
       .json({
-        message: "Successfully received count of posts",
         data: {
           count
         }
@@ -39,7 +37,6 @@ router.get('/count', async (req, res, next) => {
  *
  * @apiParam (Route Parameter) {String} _id _id of post to return
  *
- * @apiSuccess (Success 200) {String} message Success message
  * @apiSuccess (Success 200) {Object} data
  * @apiSuccess (Success 200) {String} data.title Title of post
  * @apiSuccess (Success 200) {String} data.previewText Preview text of post
@@ -65,7 +62,6 @@ router.get('/:_id', async (req, res, next) => {
     return res
       .status(200)
       .json({
-        message: "Successfully received post",
         data
       })
   } catch(err) {
@@ -82,7 +78,6 @@ router.get('/:_id', async (req, res, next) => {
  * @apiParam (Query Parameter) {Number} limit=0 How many posts should be shown (0 means all of them)
  * @apiParam (Query Parameter) {Number} offset=0 How many posts should be skipped
  *
- * @apiSuccess (Success 200) {String} message Success message
  * @apiSuccess (Success 200) {Object[]} data Array of posts
  * @apiSuccess (Success 200) {String} data.title Title of post
  * @apiSuccess (Success 200) {String} data.previewText Preview text of post
@@ -106,7 +101,6 @@ router.get('/', async (req, res, next) => {
     return res
       .status(200)
       .json({
-        message: "Successfully received list of posts",
         data
       })
   } catch(err) {
@@ -125,7 +119,6 @@ router.get('/', async (req, res, next) => {
  * @apiParam (JSON Payload) {String} content Content of post
  * @apiParam (JSON Payload) {String} thumbnail Thumbnail of post
  *
- * @apiSuccess (Success 201) {String} message Success message
  * @apiSuccess (Success 201) {Object} data
  * @apiSuccess (Success 201) {String} data.title Title of post
  * @apiSuccess (Success 201) {String} data.previewText Preview text of post
@@ -145,7 +138,6 @@ router.post('/', async (req, res, next) => {
     return res
       .status(201)
       .json({
-        message: "Successfully created new post",
         data
       })
   } catch(err) {

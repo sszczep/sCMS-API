@@ -9,7 +9,6 @@ const OptionsController = require('../controllers/options.js')
  * @apiName GetOptions
  * @apiGroup Options
  *
- * @apiSuccess (Success 200) {String} message Success message
  * @apiSuccess (Success 200) {Object[]} data Array of options
  * @apiSuccess (Success 200) {String} data.key Name of option
  * @apiSuccess (Success 200) {String} data.value Value of option
@@ -23,7 +22,6 @@ router.get('/', async (req, res, next) => {
     return res
       .status(200)
       .json({
-        message: "Successfully received list of all options",
         data
       })
   } catch(err) {
@@ -39,7 +37,6 @@ router.get('/', async (req, res, next) => {
  * @apiParam (JSON Payload) {String} key Name of option
  * @apiParam (JSON Payload) {String} value Value of option
  *
- * @apiSuccess (Success 201) {String} message Success message
  * @apiSuccess (Success 201) {Object} data Newly created option
  * @apiSuccess (Success 201) {String} data.key Name of option
  * @apiSuccess (Success 201) {String} data.value Value of option
@@ -55,7 +52,6 @@ router.post('/', async (req, res, next) => {
     return res
       .status(201)
       .json({
-        message: "Successfully created new option",
         data
       })
   } catch(err) {
@@ -70,7 +66,6 @@ router.post('/', async (req, res, next) => {
  *
  * @apiParam (Route Parameter) {String} key Name of option
  *
- * @apiSuccess (Success 200) {String} message Success message
  * @apiSuccess (Success 200) {Object} data Option object
  * @apiSuccess (Success 200) {String} data.key Name of option
  * @apiSuccess (Success 200) {String} data.value Value of option
@@ -88,7 +83,6 @@ router.get('/:key', async (req, res, next) => {
     return res
       .status(200)
       .json({
-        message: "Successfully received option",
         data
       })
   } catch(err) {
@@ -105,7 +99,6 @@ router.get('/:key', async (req, res, next) => {
  * @apiParam (JSON Payload) {String} newKey New name of option
  * @apiParam (JSON Payload) {String} newValue New value of option
  *
- * @apiSuccess (Success 200) {String} message Success message
  * @apiSuccess (Success 200) {Object} data Object of updated option
  * @apiSuccess (Success 200) {String} data.key New name of option
  * @apiSuccess (Success 200) {String} data.value New value of option
@@ -126,7 +119,6 @@ router.put('/:key', async (req, res, next) => {
     return res
       .status(200)
       .json({
-        message: "Successfully changed option properties",
         data
       })
   } catch(err) {
@@ -141,7 +133,7 @@ router.put('/:key', async (req, res, next) => {
  *
  * @apiParam (Route Parameter) {String} key Name of option
  *
- * @apiSuccess (Success 200) {String} message Success message
+ * @apiSuccess (Success 200) {null} null No response data
  *
  * @apiUse ErrorObject
  */
@@ -152,11 +144,7 @@ router.delete('/:key', async (req, res, next) => {
   try {
     const data = await OptionsController.deleteOption(key);
     if(!data) throw(new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404))
-    return res
-      .status(200)
-      .json({
-        message: "Successfully deleted option"
-      })
+    return res.sendStatus(200)
   } catch(err) {
     return next(err)
   }

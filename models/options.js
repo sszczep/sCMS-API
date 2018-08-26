@@ -1,5 +1,4 @@
 const mongoose = require('../database')
-const CustomError = require('../utils/CustomError.js')
 
 const Option = new mongoose.Schema({
   key: {
