@@ -3,7 +3,8 @@ const mongoose = require('../database')
 const Post = new mongoose.Schema({
   title: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   previewText: {
     type: String,
@@ -27,7 +28,8 @@ const Post = new mongoose.Schema({
   },
   friendlyUrl: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   }
 })
 
