@@ -103,8 +103,8 @@ router.get('/:key', async(req, res, next) => {
  * @apiGroup Options
  *
  * @apiParam (Route Parameter) {String} key Name of option
- * @apiParam (JSON Payload) {String} newKey New name of option
- * @apiParam (JSON Payload) {String} newValue New value of option
+ * @apiParam (JSON Payload) {String} [newKey] New name of option
+ * @apiParam (JSON Payload) {String} [newValue] New value of option
  *
  * @apiSuccess (Success 200) {Object} data Object of updated option
  * @apiSuccess (Success 200) {String} data.key New name of option

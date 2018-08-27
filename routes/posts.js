@@ -77,9 +77,9 @@ router.get('/:_id', async(req, res, next) => {
  * @apiName GetPosts
  * @apiGroup Posts
  *
- * @apiParam (Query Parameter) {Boolean} preview=false If set to true, won't contain content
- * @apiParam (Query Parameter) {Number} limit=0 How many posts should be shown (0 means all of them)
- * @apiParam (Query Parameter) {Number} offset=0 How many posts should be skipped
+ * @apiParam (Query Parameter) {Boolean} [preview=false] If set to true, won't contain content
+ * @apiParam (Query Parameter) {Number} [limit=0] How many posts should be shown (0 means all of them)
+ * @apiParam (Query Parameter) {Number} [offset=0] How many posts should be skipped
  *
  * @apiSuccess (Success 200) {Object[]} data Array of posts
  * @apiSuccess (Success 200) {String} data.title Title of post
@@ -121,6 +121,7 @@ router.get('/', async(req, res, next) => {
  * @apiParam (JSON Payload) {String} author Author of post
  * @apiParam (JSON Payload) {String} content Content of post
  * @apiParam (JSON Payload) {String} thumbnail Thumbnail of post
+ * @apiParam (JSON Payload) {String} [friendlyUrl] Custom friendly url of post
  *
  * @apiSuccess (Success 201) {Object} data
  * @apiSuccess (Success 201) {String} data.title Title of post
