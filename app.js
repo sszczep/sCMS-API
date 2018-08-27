@@ -47,13 +47,13 @@ app.use((req, res, next) => {
  */
 
 app.use((error, req, res, next) => { // eslint-disable-line no-unused-vars
-  if (!error.status) {
-    switch (error.name) {
-      case 'ValidationError':
+  if(!error.status) {
+    switch(error.name) {
+      case'ValidationError':
         error.status = 400;
         break;
-      case 'MongoError':
-        if (error.code === 11000) {
+      case'MongoError':
+        if(error.code === 11000) {
           error.status = 409;
         }
         break;

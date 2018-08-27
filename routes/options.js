@@ -27,7 +27,7 @@ router.get('/', async(req, res, next) => {
       .json({
         data
       });
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 });
@@ -58,7 +58,7 @@ router.post('/', async(req, res, next) => {
       .json({
         data
       });
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 });
@@ -83,7 +83,7 @@ router.get('/:key', async(req, res, next) => {
   try {
     const data = await OptionsController.getOption(key);
 
-    if (!data) {
+    if(!data) {
       throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
     }
 
@@ -92,7 +92,7 @@ router.get('/:key', async(req, res, next) => {
       .json({
         data
       });
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 });
@@ -123,7 +123,7 @@ router.put('/:key', async(req, res, next) => {
   try {
     const data = await OptionsController.updateOption(obj);
 
-    if (!data) {
+    if(!data) {
       throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
     }
 
@@ -132,7 +132,7 @@ router.put('/:key', async(req, res, next) => {
       .json({
         data
       });
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 });
@@ -155,12 +155,12 @@ router.delete('/:key', async(req, res, next) => {
   try {
     const data = await OptionsController.deleteOption(key);
 
-    if (!data) {
+    if(!data) {
       throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
     }
 
     return res.sendStatus(200);
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 });

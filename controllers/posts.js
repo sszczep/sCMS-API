@@ -16,8 +16,7 @@ const createNewPost = async data => {
   data.friendlyUrl = data.friendlyUrl || `post/${friendlyTitle}`;
 
   return await PostModel
-    .create(data)
-    .exec();
+    .create(data);
 };
 
 const getPostsCount = async() =>

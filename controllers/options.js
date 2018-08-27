@@ -18,8 +18,7 @@ const getOptions = async() =>
 
 const createOption = async data =>
   await OptionModel
-    .create(data)
-    .exec();
+    .create(data);
 
 const updateOption = async data =>
   await OptionModel

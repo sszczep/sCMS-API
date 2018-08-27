@@ -27,7 +27,7 @@ router.get('/', async(req, res, next) => {
       .json({
         data
       });
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 });
@@ -54,7 +54,7 @@ router.post('/', async(req, res, next) => {
       .json({
         data
       });
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 });

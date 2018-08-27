@@ -3,6 +3,17 @@
   "rules": {
     "space-before-function-paren": ["error", "never"],
     "dot-location": ["error", "property"],
+    "no-underscore-dangle": ["error", {
+      "allow": ["_id"]
+    }],
+    "keyword-spacing": ["error", {
+      "after": false,
+      "overrides":
+        {
+          "const": { "after": true },
+          "try": { "after": true }
+        }
+    }],
     "new-cap": [ 2, {
       newIsCap: true,
       capIsNew: true,

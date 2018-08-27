@@ -28,7 +28,7 @@ router.get('/count', async(req, res, next) => {
           count
         }
       });
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 });
@@ -58,7 +58,7 @@ router.get('/:_id', async(req, res, next) => {
   try {
     const data = await PostsController.getSinglePost(id);
 
-    if (!data) {
+    if(!data) {
       throw new CustomError('NoPostFound', 'Couldn\'t find post with given id', 404);
     }
 
@@ -67,7 +67,7 @@ router.get('/:_id', async(req, res, next) => {
       .json({
         data
       });
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 });
@@ -106,7 +106,7 @@ router.get('/', async(req, res, next) => {
       .json({
         data
       });
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 });
@@ -143,7 +143,7 @@ router.post('/', async(req, res, next) => {
       .json({
         data
       });
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 });

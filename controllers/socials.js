@@ -11,8 +11,7 @@ const getSocialLinks = async() =>
 
 const createSocialLink = async data =>
   await SocialLinksModel
-    .create(data)
-    .exec();
+    .create(data);
 
 module.exports = {
   getSocialLinks,

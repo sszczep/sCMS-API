@@ -9,5 +9,6 @@ module.exports = {
     url: process.env.DATABASE_URL || 'localhost:27017/blog',
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD
-  }
+  },
+  jwtSecret: process.env.JWT_SECRET || 'secret'
 };

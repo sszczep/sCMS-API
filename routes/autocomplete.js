@@ -26,14 +26,14 @@ router.get('/:phrase?', async(req, res, next) => {
   try {
     const phrase = req.params.phrase;
 
-    if (!phrase || phrase.length < 3) {
+    if(!phrase || phrase.length < 3) {
       return next(new CustomError('PhraseTooShort', 'Searching phrase must be at least 3 characters long!', 400));
     }
 
     const data = await PostsController.findContaining(phrase);
     const results = [];
 
-    for (const item of data) {
+    for(const item of data) {
       results.push({
         name: item.title,
         subtext: item.previewText,
@@ -47,7 +47,7 @@ router.get('/:phrase?', async(req, res, next) => {
       .json({
         data: results
       });
-  } catch (err) {
+  } catch(err) {
     return next(err);
   }
 });
