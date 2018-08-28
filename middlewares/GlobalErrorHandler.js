@@ -34,40 +34,27 @@ const getStatusCode = error => {
 };
 
 module.exports = (errors, req, res, next) => { // eslint-disable-line no-unused-vars
-  // check if error object is an array or a single error
+  // force errors to be an array for further processing:
   if(!Array.isArray(errors)) {
-    // transform single error object into array
     errors = [ errors ];
   }
 
-  // if all errors have the same status code - return it, if not then use 400 as default
-  let statusCode;
-  let return400 = false;
-  const errorsToReturn = [];
+  const formattedErrors = [];
+
+  // If all errors have the same status code - return it, 400 otherwise
+  const areCodesTheSame = errors.every(error => getStatusCode(error) === getStatusCode(errors[0]));
+  const statusCode = areCodesTheSame ? getStatusCode(errors[0]) : 400;
 
   for(const error of errors) {
-    // get error status code
-    const status = getStatusCode(error);
-
-    // if return400StatusCode === false and there is no statusCode yet then set it
-    // if the statusCode is different than error.status, set flag return400 to true
-    if(!return400 && !statusCode) {
-      statusCode = status;
-    } else if(statusCode !== status) {
-      return400 = true;
-    }
-
-    // push error to array
-    errorsToReturn.push({
+    formattedErrors.push({
       name: error.name,
       message: error.message
     });
   }
 
-  // send response
   res
-    .status(return400 ? 400 : statusCode)
+    .status(statusCode)
     .json({
-      errors: errorsToReturn
+      errors: formattedErrors
     });
 };
