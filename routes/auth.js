@@ -4,7 +4,8 @@ const express = require('express');
 const router = express.Router();
 const AuthController = require('../controllers/auth.js');
 const UserController = require('../controllers/users.js');
-const CustomError = require('../utils/CustomError.js');
+const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js');
+const { body } = require('express-validator/check');
 
 /**
  * @api {post} /auth/login Login into site using credentials (email and password)
@@ -19,12 +20,11 @@ const CustomError = require('../utils/CustomError.js');
  * @apiUse ErrorObject
  */
 
-router.post('/login', async(req, res, next) => {
+router.post('/login', [
+  body('email').isEmail(),
+  body('password').exists()
+], ValidationErrorHandler, async(req, res, next) => {
   const { email, password } = req.body;
-
-  if(!email || !password) {
-    return next(new CustomError('NoCredentials', 'You need to pass an email and a password as credentials', 400));
-  }
 
   try {
     const token = await AuthController.validateCredentialsAndReturnJWT(email, password);

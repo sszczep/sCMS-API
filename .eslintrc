@@ -11,7 +11,9 @@
       "overrides":
         {
           "const": { "after": true },
-          "try": { "after": true }
+          "try": { "after": true },
+          "case": { "after": true },
+          "else": { "after": true }
         }
     }],
     "new-cap": [ 2, {
