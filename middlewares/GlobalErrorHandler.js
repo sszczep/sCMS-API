@@ -34,20 +34,19 @@ const getStatusCode = error => {
 };
 
 module.exports = (errors, req, res, next) => { // eslint-disable-line no-unused-vars
-  // Force errors to be an array for further processing:
+  // force errors to be an array for further processing:
   if(!Array.isArray(errors)) {
     errors = [ errors ];
   }
 
-  const formatedErrors = [];
+  const formattedErrors = [];
 
   // If all errors have the same status code - return it, 400 otherwise
-  const statusCode = errors.reduce((a, b) =>
-    getStatusCode(a) === getStatusCode(b) ? getStatusCode(a) : 400
-  );
+  const areCodesTheSame = errors.every(error => getStatusCode(error) === getStatusCode(errors[0]));
+  const statusCode = areCodesTheSame ? getStatusCode(errors[0]) : 400;
 
   for(const error of errors) {
-    formatedErrors.push({
+    formattedErrors.push({
       name: error.name,
       message: error.message
     });
@@ -55,5 +54,7 @@ module.exports = (errors, req, res, next) => { // eslint-disable-line no-unused-
 
   res
     .status(statusCode)
-    .json({ errors: formatedErrors });
+    .json({
+      errors: formattedErrors
+    });
 };
