@@ -2,7 +2,6 @@
 
 const express = require('express');
 const router = express.Router();
-
 const SocialsController = require('../controllers/socials.js');
 
 /**

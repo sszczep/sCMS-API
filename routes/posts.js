@@ -2,9 +2,8 @@
 
 const express = require('express');
 const router = express.Router();
-const CustomError = require('../utils/CustomError.js');
-
 const PostsController = require('../controllers/posts.js');
+const CustomError = require('../utils/CustomError.js');
 
 /**
  * @api {get} /posts/count Get count of all posts

@@ -1,16 +1,16 @@
 'use strict';
 
-const UsersModel = require('../models/users.js');
+const UserModel = require('../models/users.js');
 
-const getUser = async _id =>
-  await UsersModel
-    .findOne({ _id })
+const getUser = async data =>
+  await UserModel
+    .findOne(data)
     .select(`-__v -password`)
     .lean()
     .exec();
 
 const registerUser = async data =>
-  await UsersModel
+  await UserModel
     .create(data);
 
 module.exports = {
