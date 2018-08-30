@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { body } = require('express-validator/check');
+const { body: bodyValidation } = require('express-validator/check');
 const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js');
 const noUserWithGivenEmail = require('../middlewares/noUserWithGivenEmail.js');
 const AuthController = require('../controllers/auth.js');
@@ -23,10 +23,10 @@ const UserController = require('../controllers/users.js');
 
 router.post('/login',
   [
-    body('email')
+    bodyValidation('email')
       .isEmail()
       .normalizeEmail(),
-    body('password').exists()
+    bodyValidation('password').exists()
   ],
   ValidationErrorHandler,
   async(req, res, next) => {
@@ -59,12 +59,10 @@ router.post('/login',
  */
 
 router.post('/register', [
-  body('email')
+  bodyValidation('email')
     .isEmail()
     .normalizeEmail(),
-  body('password')
-    .isLength({ min: 6 })
-    .trim()
+  bodyValidation('password').isLength({ min: 6 })
 ], ValidationErrorHandler, noUserWithGivenEmail, async(req, res, next) => {
   try {
     const user = await UserController.registerUser(req.body);

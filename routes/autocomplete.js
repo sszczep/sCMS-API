@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { param } = require('express-validator/check');
+const { param: paramValidation } = require('express-validator/check');
 const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js');
 const PostsController = require('../controllers/posts.js');
 
@@ -23,7 +23,9 @@ const PostsController = require('../controllers/posts.js');
  */
 
 router.get('/:phrase?',
-  param('phrase').isLength({ min: 3 }),
+  paramValidation('phrase')
+    .isLength({ min: 3 })
+    .trim(),
   ValidationErrorHandler,
   async(req, res, next) => {
     try {

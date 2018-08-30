@@ -2,6 +2,9 @@
 
 const express = require('express');
 const router = express.Router();
+const { body: bodyValidation } = require('express-validator/check');
+const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js');
+const isLogged = require('../middlewares/isLogged.js');
 const OptionsController = require('../controllers/options.js');
 const CustomError = require('../utils/CustomError.js');
 
@@ -23,37 +26,6 @@ router.get('/', async(req, res, next) => {
 
     return res
       .status(200)
-      .json({
-        data
-      });
-  } catch(err) {
-    return next(err);
-  }
-});
-
-/**
- * @api {post} /options Create new option
- * @apiName CreateOption
- * @apiGroup Options
- *
- * @apiParam (JSON Payload) {String} key Name of option
- * @apiParam (JSON Payload) {String} value Value of option
- *
- * @apiSuccess (Success 201) {Object} data Newly created option
- * @apiSuccess (Success 201) {String} data.key Name of option
- * @apiSuccess (Success 201) {String} data.value Value of option
- *
- * @apiUse ErrorObject
- */
-
-router.post('/', async(req, res, next) => {
-  const body = req.body;
-
-  try {
-    const data = await OptionsController.createOption(body);
-
-    return res
-      .status(201)
       .json({
         data
       });
@@ -96,10 +68,59 @@ router.get('/:key', async(req, res, next) => {
   }
 });
 
+// all requests below should require authentication
+
+router.use(isLogged);
+
+/**
+ * @api {post} /options Create new option
+ * @apiName CreateOption
+ * @apiGroup Options
+ *
+ * @apiUse AuthorizationHeader
+ *
+ * @apiParam (JSON Payload) {String} key Name of option
+ * @apiParam (JSON Payload) {String} value Value of option
+ *
+ * @apiSuccess (Success 201) {Object} data Newly created option
+ * @apiSuccess (Success 201) {String} data.key Name of option
+ * @apiSuccess (Success 201) {String} data.value Value of option
+ *
+ * @apiUse ErrorObject
+ */
+
+router.post('/',
+  [
+    bodyValidation('key')
+      .exists()
+      .trim(),
+    bodyValidation('value')
+      .exists()
+      .trim()
+  ],
+  ValidationErrorHandler,
+  async(req, res, next) => {
+    const body = req.body;
+
+    try {
+      const data = await OptionsController.createOption(body);
+
+      return res
+        .status(201)
+        .json({
+          data
+        });
+    } catch(err) {
+      return next(err);
+    }
+  });
+
 /**
  * @api {put} /options/:key Update single option
  * @apiName UpdateOption
  * @apiGroup Options
+ *
+ * @apiUse AuthorizationHeader
  *
  * @apiParam (Route Parameter) {String} key Name of option
  * @apiParam (JSON Payload) {String} [newKey] New name of option
@@ -112,34 +133,41 @@ router.get('/:key', async(req, res, next) => {
  * @apiUse ErrorObject
  */
 
-router.put('/:key', async(req, res, next) => {
-  const obj = {
-    key: req.params.key,
-    newKey: req.body.newKey,
-    newValue: req.body.newValue
-  };
+router.put('/:key',
+  bodyValidation('key')
+    .exists()
+    .trim(),
+  ValidationErrorHandler,
+  async(req, res, next) => {
+    const obj = {
+      key: req.params.key,
+      newKey: req.body.newKey,
+      newValue: req.body.newValue
+    };
 
-  try {
-    const data = await OptionsController.updateOption(obj);
+    try {
+      const data = await OptionsController.updateOption(obj);
 
-    if(!data) {
-      throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
+      if(!data) {
+        throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
+      }
+
+      return res
+        .status(200)
+        .json({
+          data
+        });
+    } catch(err) {
+      return next(err);
     }
-
-    return res
-      .status(200)
-      .json({
-        data
-      });
-  } catch(err) {
-    return next(err);
-  }
-});
+  });
 
 /**
  * @api {delete} /options/:key Delete single option
  * @apiName DeleteOption
  * @apiGroup Options
+ *
+ * @apiUse AuthorizationHeader
  *
  * @apiParam (Route Parameter) {String} key Name of option
  *
@@ -148,20 +176,25 @@ router.put('/:key', async(req, res, next) => {
  * @apiUse ErrorObject
  */
 
-router.delete('/:key', async(req, res, next) => {
-  const key = req.params.key;
+router.delete('/:key',
+  bodyValidation('key')
+    .exists()
+    .trim(),
+  ValidationErrorHandler,
+  async(req, res, next) => {
+    const key = req.params.key;
 
-  try {
-    const data = await OptionsController.deleteOption(key);
+    try {
+      const data = await OptionsController.deleteOption(key);
 
-    if(!data) {
-      throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
+      if(!data) {
+        throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
+      }
+
+      return res.sendStatus(200);
+    } catch(err) {
+      return next(err);
     }
-
-    return res.sendStatus(200);
-  } catch(err) {
-    return next(err);
-  }
-});
+  });
 
 module.exports = router;

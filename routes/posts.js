@@ -2,6 +2,9 @@
 
 const express = require('express');
 const router = express.Router();
+const { body: bodyValidation } = require('express-validator/check');
+const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js');
+const isLogged = require('../middlewares/isLogged.js');
 const PostsController = require('../controllers/posts.js');
 const CustomError = require('../utils/CustomError.js');
 
@@ -110,10 +113,16 @@ router.get('/', async(req, res, next) => {
   }
 });
 
+// all requests below should require authentication
+
+router.use(isLogged);
+
 /**
  * @api {post} /posts Create new post
  * @apiName CreatePost
  * @apiGroup Posts
+ *
+ * @apiUse AuthorizationHeader
  *
  * @apiParam (JSON Payload) {String} title Title of post
  * @apiParam (JSON Payload) {String} previewText Preview text of post
@@ -121,6 +130,7 @@ router.get('/', async(req, res, next) => {
  * @apiParam (JSON Payload) {String} content Content of post
  * @apiParam (JSON Payload) {String} thumbnail Thumbnail of post
  * @apiParam (JSON Payload) {String} [friendlyUrl] Custom friendly url of post
+ * @apiParam (JSON Payload) {String} [created] Date of creation
  *
  * @apiSuccess (Success 201) {Object} data
  * @apiSuccess (Success 201) {String} data.title Title of post
@@ -129,23 +139,42 @@ router.get('/', async(req, res, next) => {
  * @apiSuccess (Success 201) {String} data.content Content of post
  * @apiSuccess (Success 201) {String} data.thumbnail Thumbail of post
  * @apiSuccess (Success 201) {String} data.friendlyUrl Friendly url of post
- * @apiSuccess (Success 201) {String} data.created Date of creation of post
+ * @apiSuccess (Success 201) {String} data.created Date of creation
  *
  * @apiUse ErrorObject
  */
 
-router.post('/', async(req, res, next) => {
-  try {
-    const data = await PostsController.createNewPost(req.body);
+router.post('/',
+  [
+    bodyValidation('title')
+      .exists()
+      .trim(),
+    bodyValidation('previewText')
+      .exists()
+      .trim(),
+    bodyValidation('author')
+      .exists()
+      .trim(),
+    bodyValidation('content')
+      .exists()
+      .trim(),
+    bodyValidation('thumbnail')
+      .isURL()
+      .trim()
+  ],
+  ValidationErrorHandler,
+  async(req, res, next) => {
+    try {
+      const data = await PostsController.createNewPost(req.body);
 
-    return res
-      .status(201)
-      .json({
-        data
-      });
-  } catch(err) {
-    return next(err);
-  }
-});
+      return res
+        .status(201)
+        .json({
+          data
+        });
+    } catch(err) {
+      return next(err);
+    }
+  });
 
 module.exports = router;
