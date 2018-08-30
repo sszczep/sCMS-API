@@ -5,7 +5,7 @@ const config = require('../config.js');
 const CustomError = require('../utils/CustomError.js');
 
 /**
- * @apiDefine
+ * @apiDefine AuthorizationHeader
  * @apiHeader {String} Authorization Authorization header
  * @apiHeaderExample {json} Authorization example:
  *  {
