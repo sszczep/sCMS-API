@@ -14,11 +14,7 @@ const CustomError = require('../utils/CustomError.js');
  * @apiName Me
  * @apiGroup Me
  *
- * @apiHeader {String} Authorization Authorization header
- * @apiHeaderExample {json} Authorization example:
- *  {
- *    "Authorization": "Bearer <jwt token here>"
- *  }
+ * @apiUse AuthorizationHeader
  *
  * @apiSuccess (Success 200) {Object} user User's details
  *
