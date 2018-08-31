@@ -52,3 +52,5 @@ app.listen(port, () => {
 process.on('uncaughtException', err => {
   logger.logAndExit('error', err.message, 1);
 });
+
+module.exports = app;

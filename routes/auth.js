@@ -58,24 +58,28 @@ router.post('/login',
  * @apiUse ErrorObject
  */
 
-router.post('/register', [
-  bodyValidation('email')
-    .isEmail()
-    .normalizeEmail(),
-  bodyValidation('password').isLength({ min: 6 })
-], ValidationErrorHandler, noUserWithGivenEmail, async(req, res, next) => {
-  try {
-    const user = await UserController.registerUser(req.body);
-    const token = user.generateJWT();
+router.post('/register',
+  [
+    bodyValidation('email')
+      .isEmail()
+      .normalizeEmail(),
+    bodyValidation('password').isLength({ min: 6 })
+  ],
+  ValidationErrorHandler,
+  noUserWithGivenEmail,
+  async(req, res, next) => {
+    try {
+      const user = await UserController.registerUser(req.body);
+      const token = user.generateJWT();
 
-    return res
-      .status(201)
-      .json({
-        token
-      });
-  } catch(err) {
-    return next(err);
-  }
-});
+      return res
+        .status(201)
+        .json({
+          token
+        });
+    } catch(err) {
+      return next(err);
+    }
+  });
 
 module.exports = router;

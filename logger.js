@@ -8,6 +8,7 @@ require('winston-daily-rotate-file');
 const transports = {
   file: new winston.transports.DailyRotateFile({
     level: env === 'development' ? 'debug' : 'info',
+    silent: env === 'test',
     filename: '%DATE%.log',
     dirname: 'logs',
     dataPattern: 'yyyy-MM',
@@ -25,6 +26,7 @@ const transports = {
 
   console: new winston.transports.Console({
     level: 'debug',
+    silent: env === 'test',
 
     format: winston.format.combine(
       winston.format.timestamp(),
@@ -33,7 +35,7 @@ const transports = {
         const dateObj = new Date(info.timestamp);
         const timestamp = dateObj.toLocaleString();
 
-        return `[${info.level}] [${timestamp}] ${info.message}`;
+        return`[${info.level}] [${timestamp}] ${info.message}`;
       })
     )
   })
