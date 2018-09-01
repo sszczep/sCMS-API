@@ -6,4 +6,8 @@ before(done => {
   mongoose.connection.dropDatabase(done);
 });
 
-require('./auth.test.js');
+/* eslint global-require: "off"*/
+
+(async function() {
+  const token = await require('./auth.test.js');
+})();

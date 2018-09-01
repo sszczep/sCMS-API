@@ -25,8 +25,11 @@ router.post('/login',
   [
     bodyValidation('email')
       .isEmail()
+      .withMessage('Invalid format of email')
       .normalizeEmail(),
-    bodyValidation('password').exists()
+    bodyValidation('password')
+      .exists()
+      .withMessage('You need to specify password')
   ],
   ValidationErrorHandler,
   async(req, res, next) => {
@@ -62,8 +65,11 @@ router.post('/register',
   [
     bodyValidation('email')
       .isEmail()
+      .withMessage('Invalid format of email')
       .normalizeEmail(),
-    bodyValidation('password').isLength({ min: 6 })
+    bodyValidation('password')
+      .isLength({ min: 6 })
+      .withMessage('Password too short')
   ],
   ValidationErrorHandler,
   noUserWithGivenEmail,
