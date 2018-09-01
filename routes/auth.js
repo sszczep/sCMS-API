@@ -4,7 +4,6 @@ const express = require('express');
 const router = express.Router();
 const { body: bodyValidation } = require('express-validator/check');
 const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js');
-const noUserWithGivenEmail = require('../middlewares/noUserWithGivenEmail.js');
 const AuthController = require('../controllers/auth.js');
 const UserController = require('../controllers/users.js');
 
@@ -66,13 +65,19 @@ router.post('/register',
     bodyValidation('email')
       .isEmail()
       .withMessage('Invalid format of email')
-      .normalizeEmail(),
+      .normalizeEmail()
+      .custom(async email => {
+        const user = await UserController.getUser({ email });
+
+        if(user) {
+          throw new Error('Email already in use');
+        }
+      }),
     bodyValidation('password')
       .isLength({ min: 6 })
       .withMessage('Password too short')
   ],
   ValidationErrorHandler,
-  noUserWithGivenEmail,
   async(req, res, next) => {
     try {
       const user = await UserController.registerUser(req.body);
