@@ -10,4 +10,6 @@ before(done => {
 
 (async function() {
   const token = await require('./auth.test.js');
+
+  require('./me.test.js')(token);
 })();

@@ -25,6 +25,7 @@ const PostsController = require('../controllers/posts.js');
 router.get('/:phrase?',
   paramValidation('phrase')
     .isLength({ min: 3 })
+    .withMessage('Phrase must be longer than 3 characters')
     .trim(),
   ValidationErrorHandler,
   async(req, res, next) => {

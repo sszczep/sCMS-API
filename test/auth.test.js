@@ -1,10 +1,8 @@
 'use strict';
 
 const app = require('../app.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const request = require('supertest');
-
-const { expect } = chai;
 
 module.exports = new Promise(resolve => {
   describe('Testing /auth', () => {
