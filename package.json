@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "PORT=3001 NODE_ENV=development node app.js",
-    "test": "PORT=3002 NODE_ENV=test mocha ./test/tests.js"
+    "test": "PORT=3002 NODE_ENV=test mocha ./test/tests.js --exit"
   },
   "author": "Sebastian Szczepański",
   "license": "ISC",
