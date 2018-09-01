@@ -13,7 +13,8 @@
           "const": { "after": true },
           "try": { "after": true },
           "case": { "after": true },
-          "else": { "after": true }
+          "else": { "after": true },
+          "return": { "after": true }
         }
     }],
     "new-cap": [ 2, {

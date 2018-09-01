@@ -35,7 +35,7 @@ const transports = {
         const dateObj = new Date(info.timestamp);
         const timestamp = dateObj.toLocaleString();
 
-        return`[${info.level}] [${timestamp}] ${info.message}`;
+        return `[${info.level}] [${timestamp}] ${info.message}`;
       })
     )
   })
