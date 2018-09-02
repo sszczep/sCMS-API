@@ -7,7 +7,7 @@ const request = require('supertest');
 module.exports = new Promise(resolve => {
   describe('Testing /auth', () => {
     describe('#POST /auth/register', () => {
-      it('Shouldn\'t register new user - empty payload', done => {
+      it('Shouldn\'t register new user - some required fields are empty', done => {
         request(app)
           .post('/auth/register')
           .send()

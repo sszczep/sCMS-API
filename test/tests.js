@@ -12,4 +12,5 @@ before(done => {
   const token = await require('./auth.test.js');
 
   require('./me.test.js')(token);
+  require('./posts.test.js')(token);
 })();

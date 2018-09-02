@@ -92,11 +92,9 @@ router.use(isLogged);
 router.post('/',
   [
     bodyValidation('key')
-      .exists()
-      .trim(),
+      .exists(),
     bodyValidation('value')
       .exists()
-      .trim()
   ],
   ValidationErrorHandler,
   async(req, res, next) => {
@@ -135,8 +133,7 @@ router.post('/',
 
 router.put('/:key',
   bodyValidation('key')
-    .exists()
-    .trim(),
+    .exists(),
   ValidationErrorHandler,
   async(req, res, next) => {
     const obj = {
@@ -178,8 +175,7 @@ router.put('/:key',
 
 router.delete('/:key',
   bodyValidation('key')
-    .exists()
-    .trim(),
+    .exists(),
   ValidationErrorHandler,
   async(req, res, next) => {
     const key = req.params.key;

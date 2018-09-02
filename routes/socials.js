@@ -60,14 +60,11 @@ router.use(isLogged);
 router.post('/',
   [
     bodyValidation('name')
-      .exists()
-      .trim(),
+      .exists(),
     bodyValidation('url')
-      .isURL()
-      .trim(),
+      .isURL(),
     bodyValidation('icon')
       .isURL()
-      .trim()
   ],
   ValidationErrorHandler,
   async(req, res, next) => {

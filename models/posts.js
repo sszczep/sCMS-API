@@ -8,7 +8,7 @@ const Post = new mongoose.Schema({
     required: true,
     unique: true
   },
-  previewText: {
+  description: {
     type: String,
     required: true
   },

@@ -6,7 +6,7 @@ const slugify = require('slugify');
 const findContaining = async phrase =>
   await PostModel
     .find({ title: { $regex: phrase, $options: 'i' }})
-    .select('friendlyUrl title thumbnail previewText')
+    .select('friendlyUrl title thumbnail description')
     .lean()
     .exec();
 
@@ -22,9 +22,9 @@ const createNewPost = async data => {
 const getPostsCount = async() =>
   await PostModel.estimatedDocumentCount();
 
-const getSinglePost = async id =>
+const getSinglePost = async data =>
   await PostModel
-    .findOne({ _id: id })
+    .findOne(data)
     .lean()
     .exec();
 
