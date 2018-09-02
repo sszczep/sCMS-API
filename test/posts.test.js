@@ -4,10 +4,67 @@ const app = require('../app.js');
 const { expect } = require('chai');
 const request = require('supertest');
 
-module.exports = token => {
-  // created posts using POST /posts request, will be filled later
-  let createdPosts = [];
+// created posts using POST /posts request, will be filled later
+let createdPosts = [];
 
+// posts which will be created
+const postsToCreate = [
+  {
+    title: 'Testing posts 1',
+    description: 'Short description 1',
+    author: 'Sebastian Szczepański',
+    content: 'Lorem ipsum...',
+    thumbnail: '/images/test.png',
+    created: Date.now()
+  },
+  {
+    title: 'Testing posts 2',
+    description: 'Short description 2',
+    author: 'Sebastian Szczepański',
+    content: 'Lorem ipsum...',
+    thumbnail: '/images/test.png',
+    created: Date.now() + 1
+  },
+  {
+    title: 'Testing posts 3',
+    description: 'Short description 3',
+    author: 'Sebastian Szczepański',
+    content: 'Lorem ipsum...',
+    thumbnail: '/images/test.png',
+    created: Date.now() + 2
+  },
+  {
+    title: 'Testing posts 4',
+    description: 'Short description 4',
+    author: 'Sebastian Szczepański',
+    content: 'Lorem ipsum...',
+    thumbnail: '/images/test.png',
+    created: Date.now() + 3
+  },
+  {
+    title: 'Testing posts 5',
+    description: 'Short description 5',
+    author: 'Sebastian Szczepański',
+    content: 'Lorem ipsum...',
+    thumbnail: '/images/test.png',
+    created: Date.now() + 4
+  }
+];
+
+const compareObjectsProperties = (obj1, obj2) => {
+  const commonProperties = Object.keys(obj1).filter(prop => obj1.hasOwnProperty(prop) && obj2.hasOwnProperty(prop));
+
+  for(const prop of commonProperties) {
+    if(prop === 'created') {
+      // compare dates
+      expect(new Date(obj1.created).getTime()).to.equal(new Date(obj2.created).getTime());
+    } else {
+      expect(obj1[prop]).to.equal(obj2[prop]);
+    }
+  }
+};
+
+module.exports = token => {
   describe('Testing /posts', () => {
     describe('#GET /posts/count', () => {
       it('Should return number of posts equal to 0', done => {
@@ -20,7 +77,8 @@ module.exports = token => {
             }
 
             expect(body.data.count).to.equal(0);
-            done();
+
+            return done();
           });
       });
     });
@@ -37,7 +95,8 @@ module.exports = token => {
             }
 
             expect(body).to.have.property('errors');
-            done();
+
+            return done();
           });
       });
 
@@ -52,55 +111,12 @@ module.exports = token => {
             }
 
             expect(body).to.have.property('errors');
-            done();
+
+            return done();
           });
       });
 
-      it('Should publish 5 new posts', done => {
-        // added created to ensure that their order by date is correct
-        const postsToCreate = [
-          {
-            title: 'Testing posts 1',
-            description: 'Short description 1',
-            author: 'Sebastian Szczepański',
-            content: 'Lorem ipsum...',
-            thumbnail: '/images/test.png',
-            created: Date.now()
-          },
-          {
-            title: 'Testing posts 2',
-            description: 'Short description 2',
-            author: 'Sebastian Szczepański',
-            content: 'Lorem ipsum...',
-            thumbnail: '/images/test.png',
-            created: Date.now() + 1
-          },
-          {
-            title: 'Testing posts 3',
-            description: 'Short description 3',
-            author: 'Sebastian Szczepański',
-            content: 'Lorem ipsum...',
-            thumbnail: '/images/test.png',
-            created: Date.now() + 2
-          },
-          {
-            title: 'Testing posts 4',
-            description: 'Short description 4',
-            author: 'Sebastian Szczepański',
-            content: 'Lorem ipsum...',
-            thumbnail: '/images/test.png',
-            created: Date.now() + 3
-          },
-          {
-            title: 'Testing posts 5',
-            description: 'Short description 5',
-            author: 'Sebastian Szczepański',
-            content: 'Lorem ipsum...',
-            thumbnail: '/images/test.png',
-            created: Date.now() + 4
-          }
-        ];
-
+      it(`Should publish ${postsToCreate.length} new posts`, done => {
         const publish = data => new Promise((resolve, reject) => {
           request(app)
             .post('/posts')
@@ -111,7 +127,7 @@ module.exports = token => {
                 return reject(err);
               }
 
-              expect(body.data.title).to.equal(data.title);
+              compareObjectsProperties(body.data, data);
 
               return resolve(body.data);
             });
@@ -123,11 +139,10 @@ module.exports = token => {
           .then(posts => {
             // sort posts by date of creation
             createdPosts = posts.sort((one, two) => two.created - one.created);
-            done();
+
+            return done();
           })
-          .catch(err => {
-            done(err);
-          });
+          .catch(err => done(err));
       });
 
       it('Shouldn\'t publish new post - there is a post with this title', done => {
@@ -147,13 +162,14 @@ module.exports = token => {
             }
 
             expect(body).to.have.property('errors');
-            done();
+
+            return done();
           });
       });
     });
 
     describe('#GET /posts/count', () => {
-      it('Should return number of posts equal to 5', done => {
+      it(`Should return number of posts equal to ${postsToCreate.length}`, done => {
         request(app)
           .get('/posts/count')
           .send()
@@ -162,8 +178,9 @@ module.exports = token => {
               return done(err);
             }
 
-            expect(body.data.count).to.equal(5);
-            done();
+            expect(body.data.count).to.equal(postsToCreate.length);
+
+            return done();
           });
       });
     });
@@ -179,7 +196,8 @@ module.exports = token => {
             }
 
             expect(body).to.have.property('errors');
-            done();
+
+            return done();
           });
       });
 
@@ -193,7 +211,8 @@ module.exports = token => {
             }
 
             expect(body).to.have.property('errors');
-            done();
+
+            return done();
           });
       });
 
@@ -206,8 +225,9 @@ module.exports = token => {
               return done(err);
             }
 
-            expect(body.data.title).to.equal(createdPosts[0].title);
-            done();
+            compareObjectsProperties(body.data, createdPosts[0]);
+
+            return done();
           });
       });
     });
@@ -222,9 +242,17 @@ module.exports = token => {
               return done(err);
             }
 
+            // reverse array (from oldest to latest)
+            body.data.reverse();
+
             expect(body.data.length).to.equal(createdPosts.length);
-            expect(body.data[0]).to.have.property('content');
-            done();
+
+            for(let i = 0; i < createdPosts.length; i++) {
+              expect(body.data[i]).to.have.property('content');
+              compareObjectsProperties(body.data[i], createdPosts[i]);
+            }
+
+            return done();
           });
       });
 
@@ -237,12 +265,21 @@ module.exports = token => {
               return done(err);
             }
 
+            // reverse array (from oldest to latest)
+            body.data.reverse();
+
             expect(body.data.length).to.equal(createdPosts.length);
-            expect(body.data[0]).not.to.have.property('content');
-            done();
+
+            for(let i = 0; i < createdPosts.length; i++) {
+              expect(body.data[i]).not.to.have.property('content');
+              compareObjectsProperties(body.data[i], createdPosts[i]);
+            }
+
+            return done();
           });
       });
 
+      // should return posts with titles [Testing posts 5, Testing posts 4, Testing posts 3]
       it('Should get three latest posts - limit = 3', done => {
         request(app)
           .get('/posts?limit=3')
@@ -252,17 +289,22 @@ module.exports = token => {
               return done(err);
             }
 
-            expect(body.data.length).to.equal(3);
-            for(let i = 0; i < 3; i++) {
-              const post = body.data[i];
+            // reverse array (from oldest to latest)
+            body.data.reverse();
 
-              // returned posts should be the latest ones
-              expect(post._id).to.equal(createdPosts[4 - i]._id);
+            const toCompare = createdPosts.slice(2);
+
+            expect(body.data.length).to.equal(3);
+
+            for(let i = 0; i < 3; i++) {
+              compareObjectsProperties(body.data[i], toCompare[i]);
             }
-            done();
+
+            return done();
           });
       });
 
+      // should return posts with titles [Testing posts 1, Testing posts 2]
       it('Should get two oldest posts - limit = 2, offset = 3', done => {
         request(app)
           .get('/posts?limit=2&offset=3')
@@ -272,14 +314,17 @@ module.exports = token => {
               return done(err);
             }
 
+            // reverse array (from oldest to latest)
+            body.data.reverse();
+
+            const toCompare = createdPosts.slice(0, 2);
+
             expect(body.data.length).to.equal(2);
             for(let i = 0; i < 2; i++) {
-              const post = body.data[i];
-
-              // returned posts should be the oldest ones
-              expect(post._id).to.equal(createdPosts[1 - i]._id);
+              compareObjectsProperties(body.data[i], toCompare[i]);
             }
-            done();
+
+            return done();
           });
       });
     });
