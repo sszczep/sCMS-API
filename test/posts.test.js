@@ -213,7 +213,7 @@ module.exports = token => {
     });
 
     describe('#GET /posts', () => {
-      it('Should get list of posts with their contents', done => {
+      it('Should get list of posts with their contents - preview = false', done => {
         request(app)
           .get('/posts')
           .send()
@@ -228,7 +228,7 @@ module.exports = token => {
           });
       });
 
-      it('Should get list of posts without their contents', done => {
+      it('Should get list of posts without their contents - preview = true', done => {
         request(app)
           .get('/posts?preview=true')
           .send()
