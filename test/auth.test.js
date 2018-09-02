@@ -7,156 +7,102 @@ const request = require('supertest');
 module.exports = new Promise(resolve => {
   describe('Testing /auth', () => {
     describe('#POST /auth/register', () => {
-      it('Shouldn\'t register new user - some required fields are empty', done => {
-        request(app)
+      it('Shouldn\'t register new user - some required fields are empty', async() => {
+        const { body } = await request(app)
           .post('/auth/register')
-          .send()
-          .end((err, { body }) => {
-            if(err) {
-              return done(err);
-            }
+          .send();
 
-            expect(body).to.have.property('errors');
-            done();
-          });
+        expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t register new user - password too short', done => {
-        request(app)
+      it('Shouldn\'t register new user - password too short', async() => {
+        const { body } = await request(app)
           .post('/auth/register')
           .send({
             email: 'test@domain.com',
             password: 'short'
-          })
-          .end((err, { body }) => {
-            if(err) {
-              return done(err);
-            }
-
-            expect(body).to.have.property('errors');
-            done();
           });
+
+        expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t register new user - wrong email format', done => {
-        request(app)
+      it('Shouldn\'t register new user - wrong email format', async() => {
+        const { body } = await request(app)
           .post('/auth/register')
           .send({
             email: 'test.domain.com',
             password: 'password'
-          })
-          .end((err, { body }) => {
-            if(err) {
-              return done(err);
-            }
-
-            expect(body).to.have.property('errors');
-            done();
           });
+
+        expect(body).to.have.property('errors');
       });
 
-      it('Should register new user', done => {
-        request(app)
+      it('Should register new user', async() => {
+        const { body } = await request(app)
           .post('/auth/register')
           .send({
             email: 'test@domain.com',
             password: 'password'
-          })
-          .end((err, { body }) => {
-            if(err) {
-              return done(err);
-            }
-
-            expect(body.token).to.be.a('string');
-            done();
           });
+
+        expect(body.token).to.be.a('string');
       });
 
-      it('Shouldn\'t register new user - email in use', done => {
-        request(app)
+      it('Shouldn\'t register new user - email in use', async() => {
+        const { body } = await request(app)
           .post('/auth/register')
           .send({
             email: 'test@domain.com',
             password: 'password'
-          })
-          .end((err, { body }) => {
-            if(err) {
-              return done(err);
-            }
-
-            expect(body).to.have.property('errors');
-            done();
           });
+
+        expect(body).to.have.property('errors');
       });
     });
 
     describe('#POST /auth/login', () => {
-      it('Shouldn\'t login - empty payload', done => {
-        request(app)
+      it('Shouldn\'t login - empty payload', async() => {
+        const { body } = await request(app)
           .post('/auth/login')
-          .send()
-          .end((err, { body }) => {
-            if(err) {
-              return done(err);
-            }
+          .send();
 
-            expect(body).to.have.property('errors');
-            done();
-          });
+        expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t login - wrong email', done => {
-        request(app)
+      it('Shouldn\'t login - wrong email', async() => {
+        const { body } = await request(app)
           .post('/auth/login')
           .send({
             email: 'test1@domain.com',
             password: 'password'
-          })
-          .end((err, { body }) => {
-            if(err) {
-              return done(err);
-            }
-
-            expect(body).to.have.property('errors');
-            done();
           });
+
+        expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t login - wrong password', done => {
-        request(app)
+      it('Shouldn\'t login - wrong password', async() => {
+        const { body } = await request(app)
           .post('/auth/login')
           .send({
             email: 'test@domain.com',
             password: 'wrongPassword'
-          })
-          .end((err, { body }) => {
-            if(err) {
-              return done(err);
-            }
-
-            expect(body).to.have.property('errors');
-            done();
           });
+
+        expect(body).to.have.property('errors');
       });
 
-      it('Should login successfully and return token', done => {
-        request(app)
+      return it('Should login successfully and return token', async() => {
+        const { body } = await request(app)
           .post('/auth/login')
           .send({
             email: 'test@domain.com',
             password: 'password'
-          })
-          .end((err, { body }) => {
-            if(err) {
-              return done(err);
-            }
-
-            expect(body.token).to.be.a('string');
-            done();
-
-            // return token
-            return resolve(body.token);
           });
+
+        expect(body.token).to.be.a('string');
+
+        // return token
+        return resolve(body.token);
       });
     });
   });
