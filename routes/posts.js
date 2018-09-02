@@ -58,6 +58,7 @@ router.get('/:id',
   paramValidation('id')
     .isMongoId()
     .withMessage('You need to specify valid post id'),
+  ValidationErrorHandler,
   async(req, res, next) => {
     const id = req.params.id;
 
