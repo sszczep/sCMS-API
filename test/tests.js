@@ -12,5 +12,8 @@ before(done => {
   const token = await require('./auth.test.js');
 
   require('./me.test.js')(token);
-  require('./posts.test.js')(token);
+
+  const posts = await require('./posts.test.js')(token);
+
+  require('./autocomplete.test.js')(posts);
 })();

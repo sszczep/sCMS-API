@@ -6,6 +6,8 @@ const slugify = require('slugify');
 const findContaining = async phrase =>
   await PostModel
     .find({ title: { $regex: phrase, $options: 'i' }})
+    .limit(10)
+    .sort('-created')
     .select('friendlyUrl title thumbnail description')
     .lean()
     .exec();

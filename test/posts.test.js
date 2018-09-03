@@ -64,7 +64,7 @@ const compareObjectsProperties = (obj1, obj2) => {
   }
 };
 
-module.exports = token => {
+module.exports = token => new Promise(resolve => {
   describe('Testing /posts', () => {
     describe('#GET /posts/count', () => {
       it('Should return number of posts equal to 0', async() => {
@@ -112,6 +112,8 @@ module.exports = token => {
         const responses = await Promise.all(promises);
 
         createdPosts = responses.sort((one, two) => two.created - one.created);
+
+        resolve(createdPosts);
       });
 
       it('Shouldn\'t publish new post - there is a post with this title', async() => {
@@ -229,4 +231,4 @@ module.exports = token => {
       });
     });
   });
-};
+});

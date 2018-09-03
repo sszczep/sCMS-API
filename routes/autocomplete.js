@@ -37,7 +37,7 @@ router.get('/:phrase?',
       for(const item of data) {
         results.push({
           name: item.title,
-          subtext: item.previewText,
+          subtext: item.description,
           avatar: item.thumbnail,
           url: item.friendlyUrl
         });
