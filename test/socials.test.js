@@ -47,16 +47,7 @@ module.exports = token => {
         expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t create new social link - empty payload', async() => {
-        const { body } = await request(app)
-          .post('/socials')
-          .set('Authorization', `Bearer ${token}`)
-          .send();
-
-        expect(body).to.have.property('errors');
-      });
-
-      it('Shouldn\'t create new social link - some of properties are missing', async() => {
+      it('Shouldn\'t create new social link - some required fields are empty', async() => {
         const { body } = await request(app)
           .post('/socials')
           .set('Authorization', `Bearer ${token}`)
