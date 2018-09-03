@@ -15,7 +15,7 @@ const findContaining = async phrase =>
 const createNewPost = async data => {
   const friendlyTitle = slugify(data.title, { lower: true });
 
-  data.friendlyUrl = data.friendlyUrl || `post/${friendlyTitle}`;
+  data.friendlyUrl = data.friendlyUrl || `posts/${friendlyTitle}`;
 
   return await PostModel
     .create(data);
