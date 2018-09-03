@@ -64,7 +64,7 @@ router.post('/',
     bodyValidation('url')
       .isURL(),
     bodyValidation('icon')
-      .isURL()
+      .exists()
   ],
   ValidationErrorHandler,
   async(req, res, next) => {

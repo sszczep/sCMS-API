@@ -16,4 +16,6 @@ before(done => {
   const posts = await require('./posts.test.js')(token);
 
   require('./autocomplete.test.js')(posts);
+
+  require('./socials.test.js')(token);
 })();
