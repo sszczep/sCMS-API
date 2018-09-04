@@ -15,7 +15,8 @@ const UserController = require('../controllers/users.js');
  * @apiParam (JSON Payload) {String} email Email
  * @apiParam (JSON Payload) {String} password Password
  *
- * @apiSuccess (Success 200) {String} token JWT token
+ * @apiSuccess (Success 200) {Object} data User object
+ * @apiSuccess (Success 200) {String} data.token JWT token
  *
  * @apiUse ErrorObject
  */
@@ -40,7 +41,9 @@ router.post('/login',
       return res
         .status(200)
         .json({
-          token
+          data: {
+            token
+          }
         });
     } catch(err) {
       return next(err);
@@ -55,7 +58,8 @@ router.post('/login',
  * @apiParam (JSON Payload) {String} email Email
  * @apiParam (JSON Payload) {String} password Password
  *
- * @apiSuccess (Success 200) {String} token JWT token
+ * @apiSuccess (Success 201) {Object} data User object
+ * @apiSuccess (Success 201) {String} data.token JWT token
  *
  * @apiUse ErrorObject
  */
@@ -86,7 +90,9 @@ router.post('/register',
       return res
         .status(201)
         .json({
-          token
+          data: {
+            token
+          }
         });
     } catch(err) {
       return next(err);

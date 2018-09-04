@@ -45,7 +45,7 @@ module.exports = new Promise(resolve => {
             password: 'password'
           });
 
-        expect(body.token).to.be.a('string');
+        expect(body.data.token).to.be.a('string');
       });
 
       it('Shouldn\'t register new user - email in use', async() => {
@@ -99,10 +99,10 @@ module.exports = new Promise(resolve => {
             password: 'password'
           });
 
-        expect(body.token).to.be.a('string');
+        expect(body.data.token).to.be.a('string');
 
         // return token
-        return resolve(body.token);
+        return resolve(body.data.token);
       });
     });
   });

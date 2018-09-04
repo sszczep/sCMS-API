@@ -30,7 +30,7 @@ module.exports = token => {
           .set('Authorization', `Bearer ${token}`)
           .send();
 
-        expect(body.user.email).to.equal('test@domain.com');
+        expect(body.data.email).to.equal('test@domain.com');
       });
     });
   });

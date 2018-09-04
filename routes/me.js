@@ -29,7 +29,7 @@ router.get('/', isLogged, async(req, res, next) => {
     return res
       .status(200)
       .json({
-        user
+        data: user
       });
   } catch(err) {
     return next(err);
