@@ -4,13 +4,6 @@ const app = require('../app.js');
 const { expect } = require('chai');
 const request = require('supertest');
 
-const compareResponseToPost = (response, post) => {
-  expect(response.name).to.equal(post.title);
-  expect(response.subtext).to.equal(post.description);
-  expect(response.avatar).to.equal(post.thumbnail);
-  expect(response.url).to.equal(post.friendlyUrl);
-};
-
 module.exports = posts => {
   describe('Testing /autocomplete', () => {
     describe('#GET /autocomplete/:phrase', () => {
@@ -45,7 +38,10 @@ module.exports = posts => {
 
         expect(body.data.length).to.equal(1);
 
-        compareResponseToPost(body.data[0], posts[0]);
+        expect(body.data[0].name).to.equal(posts[0].title);
+        expect(body.data[0].subtext).to.equal(posts[0].description);
+        expect(body.data[0].avatar).to.equal(posts[0].thumbnail);
+        expect(body.data[0].url).to.equal(posts[0].friendlyUrl);
       });
 
       it('Should return five posts', async() => {
@@ -58,7 +54,10 @@ module.exports = posts => {
         body.data.reverse();
 
         for(let i = 0; i < body.data.length; i++) {
-          compareResponseToPost(body.data[i], posts[i]);
+          expect(body.data[i].name).to.equal(posts[i].title);
+          expect(body.data[i].subtext).to.equal(posts[i].description);
+          expect(body.data[i].avatar).to.equal(posts[i].thumbnail);
+          expect(body.data[i].url).to.equal(posts[i].friendlyUrl);
         }
       });
     });
