@@ -4,6 +4,10 @@ const app = require('../app.js');
 const { expect } = require('chai');
 const request = require('supertest');
 
+// created socials using POST /socials request, will be filled later
+let createdSocials = [];
+
+// socials which will be created
 const socialsToCreate = [
   {
     name: 'Facebook',
@@ -65,17 +69,16 @@ module.exports = token => {
             .set('Authorization', `Bearer ${token}`)
             .send(data);
 
-          body.data._id = undefined;
-          body.data.__v = undefined; // eslint-disable-line no-underscore-dangle
+          expect(body.data.name).to.equal(data.name);
+          expect(body.data.url).to.equal(data.url);
+          expect(body.data.icon).to.equal(data.icon);
 
-          expect(JSON.stringify(body.data)).to.equal(JSON.stringify(data));
-
-          return body;
+          return body.data;
         };
 
         const promises = socialsToCreate.map(elem => publish(elem));
 
-        await Promise.all(promises);
+        createdSocials = await Promise.all(promises);
       });
 
       it('Shouldn\'t create new social link - there is a link with given name', async() => {
@@ -94,23 +97,7 @@ module.exports = token => {
           .get('/socials')
           .send();
 
-        expect(body.data.length).to.equal(socialsToCreate.length);
-
-        for(const responseLink of body.data) {
-          responseLink._id = undefined;
-          responseLink.__v = undefined; // eslint-disable-line no-underscore-dangle
-
-          let matched = false;
-
-          for(const link of socialsToCreate) {
-            if(responseLink.name === link.name) {
-              expect(JSON.stringify(responseLink)).to.equal(JSON.stringify(link));
-              matched = true;
-            }
-          }
-
-          expect(matched).to.equal(true);
-        }
+        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(createdSocials));
       });
     });
   });
