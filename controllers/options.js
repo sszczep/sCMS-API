@@ -2,33 +2,38 @@
 
 const OptionModel = require('../models/options.js');
 
-const getOption = async key =>
+const getOption = async data =>
   await OptionModel
-    .findOne({ key })
-    .select('key value')
+    .findOne(data)
+    .select('-__v')
     .lean()
     .exec();
 
 const getOptions = async() =>
   await OptionModel
     .find()
-    .select('key value')
+    .select('-__v')
     .lean()
     .exec();
 
-const createOption = async data =>
-  await OptionModel
+const createOption = async data => {
+  const response = await OptionModel
     .create(data);
+
+  response.__v = undefined; // eslint-disable-line no-underscore-dangle
+
+  return response;
+};
 
 const updateOption = async data =>
   await OptionModel
-    .findOneAndUpdate({ key: data.key }, { key: data.newKey, value: data.newValue }, { new: true, runValidators: true })
-    .select('key value')
+    .findOneAndUpdate(data.find, data.update, { new: true, runValidators: true })
+    .select('-__v')
     .exec();
 
-const deleteOption = async key =>
+const deleteOption = async data =>
   await OptionModel
-    .findOneAndRemove({ key })
+    .findOneAndRemove(data)
     .exec();
 
 module.exports = {

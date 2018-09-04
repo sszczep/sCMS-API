@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { body: bodyValidation } = require('express-validator/check');
+const { body: bodyValidation, param: paramValidation } = require('express-validator/check');
 const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js');
 const isLogged = require('../middlewares/isLogged.js');
 const OptionsController = require('../controllers/options.js');
@@ -35,11 +35,11 @@ router.get('/', async(req, res, next) => {
 });
 
 /**
- * @api {get} /options/:key Get single option
+ * @api {get} /options/:_id Get single option
  * @apiName GetOption
  * @apiGroup Options
  *
- * @apiParam (Route Parameter) {String} key Name of option
+ * @apiParam (Route Parameter) {String} _id ID of option
  *
  * @apiSuccess (Success 200) {Object} data Option object
  * @apiSuccess (Success 200) {String} data.key Name of option
@@ -48,25 +48,29 @@ router.get('/', async(req, res, next) => {
  * @apiUse ErrorObject
  */
 
-router.get('/:key', async(req, res, next) => {
-  const key = req.params.key;
+router.get('/:_id',
+  paramValidation('_id')
+    .exists(),
+  ValidationErrorHandler,
+  async(req, res, next) => {
+    const _id = req.params._id;
 
-  try {
-    const data = await OptionsController.getOption(key);
+    try {
+      const data = await OptionsController.getOption({ _id });
 
-    if(!data) {
-      throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
+      if(!data) {
+        throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
+      }
+
+      return res
+        .status(200)
+        .json({
+          data
+        });
+    } catch(err) {
+      return next(err);
     }
-
-    return res
-      .status(200)
-      .json({
-        data
-      });
-  } catch(err) {
-    return next(err);
-  }
-});
+  });
 
 // all requests below should require authentication
 
@@ -114,13 +118,13 @@ router.post('/',
   });
 
 /**
- * @api {put} /options/:key Update single option
+ * @api {put} /options/:_id Update single option
  * @apiName UpdateOption
  * @apiGroup Options
  *
  * @apiUse AuthorizationHeader
  *
- * @apiParam (Route Parameter) {String} key Name of option
+ * @apiParam (Route Parameter) {String} _id ID of option
  * @apiParam (JSON Payload) {String} [newKey] New name of option
  * @apiParam (JSON Payload) {String} [newValue] New value of option
  *
@@ -131,22 +135,27 @@ router.post('/',
  * @apiUse ErrorObject
  */
 
-router.put('/:key',
-  bodyValidation('key')
+router.put('/:_id',
+  paramValidation('_id')
     .exists(),
   ValidationErrorHandler,
   async(req, res, next) => {
-    const obj = {
-      key: req.params.key,
-      newKey: req.body.newKey,
-      newValue: req.body.newValue
-    };
+    // first stringify object and then create it back to get rid of undefined properties
+    const obj = JSON.parse(JSON.stringify({
+      find: {
+        _id: req.params._id
+      },
+      update: {
+        key: req.body.newKey,
+        value: req.body.newValue
+      }
+    }));
 
     try {
       const data = await OptionsController.updateOption(obj);
 
       if(!data) {
-        throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
+        throw new CustomError('NoOptionFound', 'Couldn\'t find option with given id', 404);
       }
 
       return res
@@ -160,31 +169,31 @@ router.put('/:key',
   });
 
 /**
- * @api {delete} /options/:key Delete single option
+ * @api {delete} /options/:_id Delete single option
  * @apiName DeleteOption
  * @apiGroup Options
  *
  * @apiUse AuthorizationHeader
  *
- * @apiParam (Route Parameter) {String} key Name of option
+ * @apiParam (Route Parameter) {String} id ID of option
  *
  * @apiSuccess (Success 200) {null} null No response data
  *
  * @apiUse ErrorObject
  */
 
-router.delete('/:key',
-  bodyValidation('key')
+router.delete('/:_id',
+  paramValidation('_id')
     .exists(),
   ValidationErrorHandler,
   async(req, res, next) => {
-    const key = req.params.key;
+    const _id = req.params._id;
 
     try {
-      const data = await OptionsController.deleteOption(key);
+      const data = await OptionsController.deleteOption({ _id });
 
       if(!data) {
-        throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
+        throw new CustomError('NoOptionFound', 'Couldn\'t find option with given id', 404);
       }
 
       return res.sendStatus(200);

@@ -18,4 +18,6 @@ before(done => {
   require('./autocomplete.test.js')(posts);
 
   require('./socials.test.js')(token);
+
+  require('./options.test.js')(token);
 })();
