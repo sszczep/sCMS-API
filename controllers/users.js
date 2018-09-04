@@ -5,13 +5,18 @@ const UserModel = require('../models/users.js');
 const getUser = async data =>
   await UserModel
     .findOne(data)
-    .select(`-__v -password`)
+    .select(`-__v`)
     .lean()
     .exec();
 
-const registerUser = async data =>
-  await UserModel
+const registerUser = async data => {
+  const response = await UserModel
     .create(data);
+
+  response.__v = undefined; // eslint-disable-line no-underscore-dangle
+
+  return response;
+};
 
 module.exports = {
   getUser,

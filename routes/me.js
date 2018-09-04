@@ -26,6 +26,8 @@ router.get('/', isLogged, async(req, res, next) => {
       return next(new CustomError('NoUser', 'There is no user with given _id', 404));
     }
 
+    user.password = undefined;
+
     return res
       .status(200)
       .json({
