@@ -16,6 +16,7 @@ const CustomError = require('../utils/CustomError.js');
  * @apiSuccess (Success 200) {Object[]} data Array of options
  * @apiSuccess (Success 200) {String} data.key Name of option
  * @apiSuccess (Success 200) {String} data.value Value of option
+ * @apiSuccess (Success 200) {String} data._id ID of option
  *
  * @apiUse ErrorObject
  */
@@ -35,7 +36,7 @@ router.get('/', async(req, res, next) => {
 });
 
 /**
- * @api {get} /options/:_id Get single option
+ * @api {get} /options/:_id Get a single option
  * @apiName GetOption
  * @apiGroup Options
  *
@@ -44,6 +45,7 @@ router.get('/', async(req, res, next) => {
  * @apiSuccess (Success 200) {Object} data Option object
  * @apiSuccess (Success 200) {String} data.key Name of option
  * @apiSuccess (Success 200) {String} data.value Value of option
+ * @apiSuccess (Success 200) {String} data._id ID of option
  *
  * @apiUse ErrorObject
  */
@@ -89,6 +91,7 @@ router.use(isLogged);
  * @apiSuccess (Success 201) {Object} data Newly created option
  * @apiSuccess (Success 201) {String} data.key Name of option
  * @apiSuccess (Success 201) {String} data.value Value of option
+ * @apiSuccess (Success 201) {String} data._id ID of option
  *
  * @apiUse ErrorObject
  */
@@ -131,6 +134,7 @@ router.post('/',
  * @apiSuccess (Success 200) {Object} data Object of updated option
  * @apiSuccess (Success 200) {String} data.key New name of option
  * @apiSuccess (Success 200) {String} data.value New value of option
+ * @apiSuccess (Success 200) {String} data._id ID of option
  *
  * @apiUse ErrorObject
  */

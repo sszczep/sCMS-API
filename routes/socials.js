@@ -10,12 +10,13 @@ const SocialsController = require('../controllers/socials.js');
 /**
  * @api {get} /socials Get list of social links
  * @apiName GetSocialLinks
- * @apiGroup SocialLinks
+ * @apiGroup Social links
  *
  * @apiSuccess (Success 200) {Object[]} data Array of social links
  * @apiSuccess (Success 200) {String} data.name Name of social link
  * @apiSuccess (Success 200) {String} data.url Url of social link
  * @apiSuccess (Success 200) {String} data.icon Icon for social link
+ * @apiSuccess (Success 200) {String} data._id ID of social link
  *
  * @apiUse ErrorObject
  */
@@ -41,7 +42,7 @@ router.use(isLogged);
 /**
  * @api {post} /socials Create new social link
  * @apiName CreateSocialLink
- * @apiGroup SocialLinks
+ * @apiGroup Social links
  *
  * @apiUse AuthorizationHeader
  *
@@ -53,6 +54,7 @@ router.use(isLogged);
  * @apiSuccess (Success 201) {String} data.name Name of social link
  * @apiSuccess (Success 201) {String} data.url Url of social link
  * @apiSuccess (Success 201) {String} data.icon Icon of social link
+ * @apiSuccess (Success 201) {String} data._id ID of social link
  *
  * @apiUse ErrorObject
  */

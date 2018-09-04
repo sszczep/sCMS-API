@@ -50,6 +50,7 @@ router.get('/count', async(req, res, next) => {
  * @apiSuccess (Success 200) {String} data.thumbnail Thumbail of post
  * @apiSuccess (Success 200) {String} data.friendlyUrl Friendly url of post
  * @apiSuccess (Success 200) {String} data.created Date of creation of post
+ * @apiSuccess (Success 200) {String} data._id ID of post
  *
  * @apiUse ErrorObject
  */
@@ -96,6 +97,7 @@ router.get('/:id',
  * @apiSuccess (Success 200) {String} data.thumbnail Thumbail of post
  * @apiSuccess (Success 200) {String} data.friendlyUrl Friendly url of post
  * @apiSuccess (Success 200) {String} data.created Date of creation of post
+ * @apiSuccess (Success 200) {String} data._id ID of post
  *
  * @apiUse ErrorObject
  */
@@ -145,6 +147,7 @@ router.use(isLogged);
  * @apiSuccess (Success 201) {String} data.thumbnail Thumbail of post
  * @apiSuccess (Success 201) {String} data.friendlyUrl Friendly url of post
  * @apiSuccess (Success 201) {String} data.created Date of creation
+ * @apiSuccess (Success 201) {String} data._id ID of post
  *
  * @apiUse ErrorObject
  */
