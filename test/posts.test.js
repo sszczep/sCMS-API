@@ -51,19 +51,6 @@ const postsToCreate = [
   }
 ];
 
-const compareObjectsProperties = (obj1, obj2) => {
-  const commonProperties = Object.keys(obj1).filter(prop => obj1.hasOwnProperty(prop) && obj2.hasOwnProperty(prop));
-
-  for(const prop of commonProperties) {
-    if(prop === 'created') {
-      // compare dates
-      expect(new Date(obj1.created).getTime()).to.equal(new Date(obj2.created).getTime());
-    } else {
-      expect(obj1[prop]).to.equal(obj2[prop]);
-    }
-  }
-};
-
 module.exports = token => new Promise(resolve => {
   describe('Testing /posts', () => {
     describe('#GET /posts/count', () => {
@@ -102,16 +89,19 @@ module.exports = token => new Promise(resolve => {
             .set('Authorization', `Bearer ${token}`)
             .send(data);
 
-          compareObjectsProperties(body.data, data);
+          expect(body.data.title).to.equal(data.title);
+          expect(body.data.description).to.equal(data.description);
+          expect(body.data.author).to.equal(data.author);
+          expect(body.data.content).to.equal(data.content);
+          expect(body.data.thumbnail).to.equal(data.thumbnail);
+          expect(new Date(body.data.created).getTime()).to.equal(data.created);
 
           return body.data;
         };
 
         const promises = postsToCreate.map(elem => publish(elem));
 
-        const responses = await Promise.all(promises);
-
-        createdPosts = responses.sort((one, two) => two.created - one.created);
+        createdPosts = await Promise.all(promises);
 
         resolve(createdPosts);
       });
@@ -158,7 +148,7 @@ module.exports = token => new Promise(resolve => {
           .get(`/posts/${createdPosts[0]._id}`)
           .send();
 
-        compareObjectsProperties(body.data, createdPosts[0]);
+        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(createdPosts[0]));
       });
     });
 
@@ -168,15 +158,9 @@ module.exports = token => new Promise(resolve => {
           .get('/posts')
           .send();
 
-        // reverse array (from oldest to latest)
         body.data.reverse();
 
-        expect(body.data.length).to.equal(createdPosts.length);
-
-        for(let i = 0; i < createdPosts.length; i++) {
-          expect(body.data[i]).to.have.property('content');
-          compareObjectsProperties(body.data[i], createdPosts[i]);
-        }
+        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(createdPosts));
       });
 
       it('Should get list of posts without their contents - preview = true', async() => {
@@ -184,15 +168,17 @@ module.exports = token => new Promise(resolve => {
           .get('/posts?preview=true')
           .send();
 
-        // reverse array (from oldest to latest)
         body.data.reverse();
 
-        expect(body.data.length).to.equal(createdPosts.length);
+        const postsWithoutContent = createdPosts.map(post => {
+          const newPost = { ...post };
 
-        for(let i = 0; i < createdPosts.length; i++) {
-          expect(body.data[i]).not.to.have.property('content');
-          compareObjectsProperties(body.data[i], createdPosts[i]);
-        }
+          newPost.content = undefined;
+
+          return newPost;
+        });
+
+        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(postsWithoutContent));
       });
 
       // should return posts with titles [Testing posts 5, Testing posts 4, Testing posts 3]
@@ -206,11 +192,7 @@ module.exports = token => new Promise(resolve => {
 
         const toCompare = createdPosts.slice(2);
 
-        expect(body.data.length).to.equal(3);
-
-        for(let i = 0; i < 3; i++) {
-          compareObjectsProperties(body.data[i], toCompare[i]);
-        }
+        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(toCompare));
       });
 
       // should return posts with titles [Testing posts 1, Testing posts 2]
@@ -224,10 +206,7 @@ module.exports = token => new Promise(resolve => {
 
         const toCompare = createdPosts.slice(0, 2);
 
-        expect(body.data.length).to.equal(2);
-        for(let i = 0; i < 2; i++) {
-          compareObjectsProperties(body.data[i], toCompare[i]);
-        }
+        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(toCompare));
       });
     });
   });

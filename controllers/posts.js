@@ -17,8 +17,12 @@ const createNewPost = async data => {
 
   data.friendlyUrl = data.friendlyUrl || `posts/${friendlyTitle}`;
 
-  return await PostModel
+  const response = await PostModel
     .create(data);
+
+  response.__v = undefined; // eslint-disable-line no-underscore-dangle
+
+  return response;
 };
 
 const getPostsCount = async() =>
@@ -27,6 +31,7 @@ const getPostsCount = async() =>
 const getSinglePost = async data =>
   await PostModel
     .findOne(data)
+    .select('-__v')
     .lean()
     .exec();
 
