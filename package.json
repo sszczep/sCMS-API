@@ -13,6 +13,7 @@
     "bcrypt": "^3.0.0",
     "body-parser": "^1.18.3",
     "chai": "^4.1.2",
+    "chai-jwt": "^2.0.0",
     "cors": "^2.8.4",
     "express": "^4.16.3",
     "express-validator": "^5.3.0",

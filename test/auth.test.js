@@ -1,8 +1,13 @@
 'use strict';
 
 const app = require('../app.js');
-const { expect } = require('chai');
+const chai = require('chai');
+const chaiJWT = require('chai-jwt');
 const request = require('supertest');
+
+chai.use(chaiJWT);
+
+const { expect } = chai;
 
 module.exports = new Promise(resolve => {
   describe('Testing /auth', () => {
@@ -45,7 +50,7 @@ module.exports = new Promise(resolve => {
             password: 'password'
           });
 
-        expect(body.data.token).to.be.a('string');
+        expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
       });
 
       it('Shouldn\'t register new user - email in use', async() => {
@@ -99,7 +104,7 @@ module.exports = new Promise(resolve => {
             password: 'password'
           });
 
-        expect(body.data.token).to.be.a('string');
+        expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
 
         // return token
         return resolve(body.data.token);
