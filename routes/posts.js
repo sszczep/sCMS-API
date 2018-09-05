@@ -46,14 +46,14 @@ router.get('/count', async(req, res, next) => {
  * @apiSuccess (Success 200) {Object} data
  * @apiSuccess (Success 200) {String} data.title Title of post
  * @apiSuccess (Success 200) {String} data.description Description of post
- * @apiSuccess (Success 200) {Object} data.author Author of post
- * @apiSuccess (Success 200) {String} data.author._id ID of author
- * @apiSuccess (Success 200) {String} data.author.fullname Full name of author
  * @apiSuccess (Success 200) {String} data.content Content of post
  * @apiSuccess (Success 200) {String} data.thumbnail Thumbail of post
  * @apiSuccess (Success 200) {String} data.friendlyUrl Friendly url of post
  * @apiSuccess (Success 200) {String} data.created Date of creation of post
  * @apiSuccess (Success 200) {String} data._id ID of post
+ * @apiSuccess (Success 200) {Object} data.author Author of post
+ * @apiSuccess (Success 200) {String} data.author.fullname Full name of author
+ * @apiSuccess (Success 200) {String} data.author._id ID of author
  *
  * @apiUse ErrorObject
  */
@@ -95,14 +95,14 @@ router.get('/:id',
  * @apiSuccess (Success 200) {Object[]} data Array of posts
  * @apiSuccess (Success 200) {String} data.title Title of post
  * @apiSuccess (Success 200) {String} data.description Description of post
- * @apiSuccess (Success 200) {Object} data.author Author of post
- * @apiSuccess (Success 200) {String} data.author._id ID of author
- * @apiSuccess (Success 200) {String} data.author.fullname Full name of author
  * @apiSuccess (Success 200) {String} data.content Content of post, only if preview is set to false
  * @apiSuccess (Success 200) {String} data.thumbnail Thumbail of post
  * @apiSuccess (Success 200) {String} data.friendlyUrl Friendly url of post
  * @apiSuccess (Success 200) {String} data.created Date of creation of post
  * @apiSuccess (Success 200) {String} data._id ID of post
+ * @apiSuccess (Success 200) {Object} data.author Author of post
+ * @apiSuccess (Success 200) {String} data.author.fullname Full name of author
+ * @apiSuccess (Success 200) {String} data.author._id ID of author
  *
  * @apiUse ErrorObject
  */
@@ -146,14 +146,14 @@ router.use(isLogged);
  * @apiSuccess (Success 201) {Object} data
  * @apiSuccess (Success 201) {String} data.title Title of post
  * @apiSuccess (Success 201) {String} data.description Description of post
- * @apiSuccess (Success 200) {Object} data.author Author of post
- * @apiSuccess (Success 200) {String} data.author._id ID of author
- * @apiSuccess (Success 200) {String} data.author.fullname Full name of author
  * @apiSuccess (Success 201) {String} data.content Content of post
  * @apiSuccess (Success 201) {String} data.thumbnail Thumbail of post
  * @apiSuccess (Success 201) {String} data.friendlyUrl Friendly url of post
  * @apiSuccess (Success 201) {String} data.created Date of creation
  * @apiSuccess (Success 201) {String} data._id ID of post
+ * @apiSuccess (Success 201) {Object} data.author Author of post
+ * @apiSuccess (Success 201) {String} data.author.fullname Full name of author
+ * @apiSuccess (Success 201) {String} data.author._id ID of author
  *
  * @apiUse ErrorObject
  */
