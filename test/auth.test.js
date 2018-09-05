@@ -96,18 +96,28 @@ module.exports = new Promise(resolve => {
         expect(body).to.have.property('errors');
       });
 
-      return it('Should login successfully and return token', async() => {
-        const { body } = await request(app)
-          .post('/auth/login')
-          .send({
-            email: 'test@domain.com',
-            password: 'password'
-          });
+      it('Should login both user and admin successfully and return tokens', async() => {
+        const login = async data => {
+          const { body } = await request(app)
+            .post('/auth/login')
+            .send(data);
 
-        expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
+          expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
 
-        // return token
-        return resolve(body.data.token);
+          return body.data.token;
+        };
+
+        const user = await login({
+          email: 'test@domain.com',
+          password: 'password'
+        });
+
+        const admin = await login({
+          email: 'admin@domain.com',
+          password: 'adminPassword'
+        });
+
+        return resolve({ user, admin });
       });
     });
   });

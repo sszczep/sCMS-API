@@ -5,6 +5,7 @@ const router = express.Router();
 const { body: bodyValidation, param: paramValidation } = require('express-validator/check');
 const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js');
 const isLogged = require('../middlewares/isLogged.js');
+const hasPermissions = require('../middlewares/hasPermissions.js');
 const OptionsController = require('../controllers/options.js');
 const CustomError = require('../utils/CustomError.js');
 
@@ -97,6 +98,7 @@ router.use(isLogged);
  */
 
 router.post('/',
+  hasPermissions([ 'createOption' ]),
   [
     bodyValidation('key')
       .exists(),
@@ -140,6 +142,7 @@ router.post('/',
  */
 
 router.put('/:_id',
+  hasPermissions([ 'changeOption' ]),
   paramValidation('_id')
     .exists(),
   ValidationErrorHandler,
@@ -187,6 +190,7 @@ router.put('/:_id',
  */
 
 router.delete('/:_id',
+  hasPermissions([ 'deleteOption' ]),
   paramValidation('_id')
     .exists(),
   ValidationErrorHandler,

@@ -5,6 +5,7 @@ const router = express.Router();
 const { body: bodyValidation, param: paramValidation } = require('express-validator/check');
 const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js');
 const isLogged = require('../middlewares/isLogged.js');
+const hasPermissions = require('../middlewares/hasPermissions.js');
 const PostController = require('../controllers/posts.js');
 const CustomError = require('../utils/CustomError.js');
 
@@ -153,6 +154,7 @@ router.use(isLogged);
  */
 
 router.post('/',
+  hasPermissions([ 'createPost' ]),
   [
     bodyValidation('title')
       .exists()

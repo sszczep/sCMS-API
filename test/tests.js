@@ -1,23 +1,32 @@
 'use strict';
 
 const mongoose = require('../database/index.js');
+const UserController = require('../controllers/users.js');
 
-before(done => {
-  mongoose.connection.dropDatabase(done);
+before(async() => {
+  // drop database
+  await mongoose.connection.dropDatabase();
+
+  // create admin account
+  await UserController.registerUser({
+    email: 'admin@domain.com',
+    password: 'adminPassword',
+    permissions: [ '*' ]
+  });
 });
 
 /* eslint global-require: "off"*/
 
 (async function() {
-  const token = await require('./auth.test.js');
+  const tokens = await require('./auth.test.js');
 
-  require('./me.test.js')(token);
+  require('./me.test.js')(tokens.user);
 
-  const posts = await require('./posts.test.js')(token);
+  const posts = await require('./posts.test.js')(tokens);
 
   require('./autocomplete.test.js')(posts);
 
-  require('./socials.test.js')(token);
+  require('./socials.test.js')(tokens);
 
-  require('./options.test.js')(token);
+  require('./options.test.js')(tokens);
 })();

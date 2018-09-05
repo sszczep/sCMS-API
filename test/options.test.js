@@ -19,7 +19,7 @@ const optionsToCreate = [
   }
 ];
 
-module.exports = token => {
+module.exports = tokens => {
   describe('Testing /options', () => {
     describe('#GET /options', () => {
       it('Should return empty erray', async() => {
@@ -35,7 +35,7 @@ module.exports = token => {
       it('Shouldn\'t create new option - some required fields are empty', async() => {
         const { body } = await request(app)
           .post('/options')
-          .set('Authorization', `Bearer ${token}`)
+          .set('Authorization', `Bearer ${tokens.admin}`)
           .send();
 
         expect(body).to.have.property('errors');
@@ -50,11 +50,20 @@ module.exports = token => {
         expect(body).to.have.property('errors');
       });
 
+      it('Shouldn\'t create new option - user has no permission', async() => {
+        const { body } = await request(app)
+          .post('/options')
+          .set('Authorization', `Bearer ${tokens.user}`)
+          .send();
+
+        expect(body).to.have.property('errors');
+      });
+
       it(`Should create ${optionsToCreate.length} new options`, async() => {
         const publish = async data => {
           const { body } = await request(app)
             .post('/options')
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Bearer ${tokens.admin}`)
             .send(data);
 
           expect(body.data.key).to.equal(data.key);
@@ -71,7 +80,7 @@ module.exports = token => {
       it('Shouldn\'t create new option - there is an option with this title', async() => {
         const { body } = await request(app)
           .post('/options')
-          .set('Authorization', `Bearer ${token}`)
+          .set('Authorization', `Bearer ${tokens.admin}`)
           .send(optionsToCreate[0]);
 
         expect(body).to.have.property('errors');
@@ -118,8 +127,17 @@ module.exports = token => {
 
       it('Shouldn\'t delete option - no option with given key', async() => {
         const { body } = await request(app)
-          .delete(`/options/NOT_EXISTING`)
-          .set('Authorization', `Bearer ${token}`)
+          .delete('/options/NOT_EXISTING')
+          .set('Authorization', `Bearer ${tokens.admin}`)
+          .send();
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Shouldn\'t delete option - user has no permission', async() => {
+        const { body } = await request(app)
+          .delete(`/options/${createdOptions[0]._id}`)
+          .set('Authorization', `Bearer ${tokens.user}`)
           .send();
 
         expect(body).to.have.property('errors');
@@ -128,7 +146,7 @@ module.exports = token => {
       it('Should delete option', async() => {
         const { body } = await request(app)
           .delete(`/options/${createdOptions[0]._id}`)
-          .set('Authorization', `Bearer ${token}`)
+          .set('Authorization', `Bearer ${tokens.admin}`)
           .send();
 
         expect(Object.keys(body).length).to.equal(0);
@@ -147,10 +165,21 @@ module.exports = token => {
         expect(body).to.have.property('errors');
       });
 
+      it('Shouldn\'t change option - user has no permission', async() => {
+        const { body } = await request(app)
+          .put(`/options/${createdOptions[1]._id}`)
+          .set('Authorization', `Bearer ${tokens.user}`)
+          .send({
+            newValue: 'New Value!'
+          });
+
+        expect(body).to.have.property('errors');
+      });
+
       it('Should change option', async() => {
         const { body } = await request(app)
           .put(`/options/${createdOptions[1]._id}`)
-          .set('Authorization', `Bearer ${token}`)
+          .set('Authorization', `Bearer ${tokens.admin}`)
           .send({
             newValue: 'New Value!'
           });

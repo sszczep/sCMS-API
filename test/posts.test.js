@@ -51,7 +51,7 @@ const postsToCreate = [
   }
 ];
 
-module.exports = token => new Promise(resolve => {
+module.exports = tokens => new Promise(resolve => {
   describe('Testing /posts', () => {
     describe('#GET /posts/count', () => {
       it('Should return number of posts equal to 0', async() => {
@@ -67,7 +67,7 @@ module.exports = token => new Promise(resolve => {
       it('Shouldn\'t publish new post - some required fields are empty', async() => {
         const { body } = await request(app)
           .post('/posts')
-          .set('Authorization', `Bearer ${token}`)
+          .set('Authorization', `Bearer ${tokens.admin}`)
           .send();
 
         expect(body).to.have.property('errors');
@@ -82,11 +82,20 @@ module.exports = token => new Promise(resolve => {
         expect(body).to.have.property('errors');
       });
 
+      it('Shouldn\'t publish new post - user has no permission', async() => {
+        const { body } = await request(app)
+          .post('/posts')
+          .set('Authorization', `Bearer ${tokens.user}`)
+          .send(postsToCreate[0]);
+
+        expect(body).to.have.property('errors');
+      });
+
       it(`Should publish ${postsToCreate.length} new posts`, async() => {
         const publish = async data => {
           const { body } = await request(app)
             .post('/posts')
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Bearer ${tokens.admin}`)
             .send(data);
 
           expect(body.data.title).to.equal(data.title);
@@ -109,7 +118,7 @@ module.exports = token => new Promise(resolve => {
       it('Shouldn\'t publish new post - there is a post with this title', async() => {
         const { body } = await request(app)
           .post('/posts')
-          .set('Authorization', `Bearer ${token}`)
+          .set('Authorization', `Bearer ${tokens.user}`)
           .send(postsToCreate[0]);
 
         expect(body).to.have.property('errors');

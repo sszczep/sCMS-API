@@ -5,6 +5,7 @@ const router = express.Router();
 const { body: bodyValidation } = require('express-validator/check');
 const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js');
 const isLogged = require('../middlewares/isLogged.js');
+const hasPermissions = require('../middlewares/hasPermissions.js');
 const SocialsController = require('../controllers/socials.js');
 
 /**
@@ -60,6 +61,7 @@ router.use(isLogged);
  */
 
 router.post('/',
+  hasPermissions([ 'createSocialLink ' ]),
   [
     bodyValidation('name')
       .exists(),

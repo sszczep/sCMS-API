@@ -38,7 +38,7 @@ module.exports = async(req, res, next) => {
       return next(new CustomError('Unauthorized', 'Given token is invalid', 401));
     }
 
-    req.userID = decoded._id;
+    req.user = decoded;
 
     return next();
   } catch(err) {

@@ -20,7 +20,7 @@ const CustomError = require('../utils/CustomError.js');
 
 router.get('/', isLogged, async(req, res, next) => {
   try {
-    const user = await UserController.getUser({ _id: req.userID });
+    const user = await UserController.getUser({ _id: req.user._id });
 
     if(!user) {
       return next(new CustomError('NoUser', 'There is no user with given _id', 404));

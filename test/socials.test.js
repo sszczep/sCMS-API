@@ -21,7 +21,7 @@ const socialsToCreate = [
   }
 ];
 
-module.exports = token => {
+module.exports = tokens => {
   describe('Testing /socials', () => {
     describe('#GET /socials', () => {
       it('Should return empty array of social links', async() => {
@@ -54,10 +54,19 @@ module.exports = token => {
       it('Shouldn\'t create new social link - some required fields are empty', async() => {
         const { body } = await request(app)
           .post('/socials')
-          .set('Authorization', `Bearer ${token}`)
+          .set('Authorization', `Bearer ${tokens.user}`)
           .send({
             name: 'Invalid social link'
           });
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Shouldn\'t create new social link - user has no permission', async() => {
+        const { body } = await request(app)
+          .post('/socials')
+          .set('Authorization', `Bearer ${tokens.user}`)
+          .send(socialsToCreate[0]);
 
         expect(body).to.have.property('errors');
       });
@@ -66,7 +75,7 @@ module.exports = token => {
         const publish = async data => {
           const { body } = await request(app)
             .post('/socials')
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Bearer ${tokens.admin}`)
             .send(data);
 
           expect(body.data.name).to.equal(data.name);
@@ -84,7 +93,7 @@ module.exports = token => {
       it('Shouldn\'t create new social link - there is a link with given name', async() => {
         const { body } = await request(app)
           .post('/socials')
-          .set('Authorization', `Bearer ${token}`)
+          .set('Authorization', `Bearer ${tokens.user}`)
           .send(socialsToCreate[0]);
 
         expect(body).to.have.property('errors');

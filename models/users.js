@@ -29,36 +29,8 @@ const User = new mongoose.Schema({
     required: false
   },
   permissions: {
-    create: {
-      posts: {
-        type: Boolean,
-        default: false
-      },
-      comments: {
-        type: Boolean,
-        default: true
-      }
-    },
-    modify: {
-      othersPosts: {
-        type: Boolean,
-        default: false
-      },
-      othersComments: {
-        type: Boolean,
-        default: false
-      },
-      othersProfiles: {
-        type: Boolean,
-        default: false
-      }
-    },
-    access: {
-      adminPanel: {
-        type: Boolean,
-        default: false
-      }
-    }
+    type: Array,
+    default: []
   }
 });
 
