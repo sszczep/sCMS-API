@@ -25,7 +25,8 @@ module.exports = new Promise(resolve => {
           .post('/auth/register')
           .send({
             email: 'test@domain.com',
-            password: 'short'
+            password: 'short',
+            fullname: 'Testing account'
           });
 
         expect(body).to.have.property('errors');
@@ -36,7 +37,8 @@ module.exports = new Promise(resolve => {
           .post('/auth/register')
           .send({
             email: 'test.domain.com',
-            password: 'password'
+            password: 'password',
+            fullname: 'Testing account'
           });
 
         expect(body).to.have.property('errors');
@@ -47,7 +49,8 @@ module.exports = new Promise(resolve => {
           .post('/auth/register')
           .send({
             email: 'test@domain.com',
-            password: 'password'
+            password: 'password',
+            fullname: 'Testing account'
           });
 
         expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions

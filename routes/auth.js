@@ -57,6 +57,7 @@ router.post('/login',
  *
  * @apiParam (JSON Payload) {String} email Email
  * @apiParam (JSON Payload) {String} password Password
+ * @apiParam (JSON Payload) {String} fullname Full name
  *
  * @apiSuccess (Success 201) {Object} data User object
  * @apiSuccess (Success 201) {String} data.token JWT token
@@ -79,7 +80,10 @@ router.post('/register',
       }),
     bodyValidation('password')
       .isLength({ min: 6 })
-      .withMessage('Password too short')
+      .withMessage('Password too short'),
+    bodyValidation('fullname')
+      .exists()
+      .withMessage('You need to specify fullname')
   ],
   ValidationErrorHandler,
   async(req, res, next) => {

@@ -21,7 +21,8 @@ const Post = new mongoose.Schema({
     default: Date.now
   },
   author: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   },
   content: {

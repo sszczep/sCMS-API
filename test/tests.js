@@ -11,6 +11,7 @@ before(async() => {
   await UserController.registerUser({
     email: 'admin@domain.com',
     password: 'adminPassword',
+    fullname: 'Admin account',
     permissions: [ '*' ]
   });
 });
@@ -20,13 +21,13 @@ before(async() => {
 (async function() {
   const tokens = await require('./auth.test.js');
 
-  require('./me.test.js')(tokens.user);
+  const users = await require('./me.test.js')(tokens);
 
-  const posts = await require('./posts.test.js')(tokens);
+  const posts = await require('./posts.test.js')(users);
 
   require('./autocomplete.test.js')(posts);
 
-  require('./socials.test.js')(tokens);
+  require('./socials.test.js')(users);
 
-  require('./options.test.js')(tokens);
+  require('./options.test.js')(users);
 })();

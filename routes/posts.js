@@ -134,7 +134,6 @@ router.use(isLogged);
  *
  * @apiParam (JSON Payload) {String} title Title of post
  * @apiParam (JSON Payload) {String} description Description of post
- * @apiParam (JSON Payload) {String} author Author of post
  * @apiParam (JSON Payload) {String} content Content of post
  * @apiParam (JSON Payload) {String} thumbnail Thumbnail of post
  * @apiParam (JSON Payload) {String} [friendlyUrl] Custom friendly url of post
@@ -169,9 +168,6 @@ router.post('/',
     bodyValidation('description')
       .exists()
       .withMessage('You need to specify short description'),
-    bodyValidation('author')
-      .exists()
-      .withMessage('You need to specify author'),
     bodyValidation('content')
       .exists()
       .withMessage('You need to specify content'),
@@ -182,7 +178,10 @@ router.post('/',
   ValidationErrorHandler,
   async(req, res, next) => {
     try {
-      const data = await PostController.createNewPost(req.body);
+      const data = await PostController.createNewPost({
+        ...req.body,
+        author: req.user._id
+      });
 
       return res
         .status(201)

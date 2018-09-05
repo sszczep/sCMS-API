@@ -18,15 +18,15 @@ const User = new mongoose.Schema({
   },
   fullname: {
     type: String,
-    required: false
+    required: true
   },
   avatar: {
     type: String,
-    required: false
+    default: ''
   },
   bio: {
     type: String,
-    required: false
+    default: ''
   },
   permissions: {
     type: Array,
