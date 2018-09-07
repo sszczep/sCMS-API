@@ -53,7 +53,8 @@ router.get('/', async(req, res, next) => {
 
 router.get('/:_id',
   paramValidation('_id')
-    .exists(),
+    .exists({ checkFalsy: true })
+    .withMessage('You need to specify _id'),
   ValidationErrorHandler,
   async(req, res, next) => {
     const _id = req.params._id;
@@ -101,9 +102,11 @@ router.post('/',
   hasPermissions([ 'createOption' ]),
   [
     bodyValidation('key')
-      .exists(),
+      .exists({ checkFalsy: true })
+      .withMessage('You need to specify key'),
     bodyValidation('value')
-      .exists()
+      .exists({ checkFalsy: true })
+      .withMessage('You need to specify value')
   ],
   ValidationErrorHandler,
   async(req, res, next) => {
@@ -144,7 +147,8 @@ router.post('/',
 router.put('/:_id',
   hasPermissions([ 'changeOption' ]),
   paramValidation('_id')
-    .exists(),
+    .exists({ checkFalsy: true })
+    .withMessage('You need to specify _id'),
   ValidationErrorHandler,
   async(req, res, next) => {
     // first stringify object and then create it back to get rid of undefined properties
@@ -192,7 +196,8 @@ router.put('/:_id',
 router.delete('/:_id',
   hasPermissions([ 'deleteOption' ]),
   paramValidation('_id')
-    .exists(),
+    .exists({ checkFalsy: true })
+    .withMessage('You need to specify _id'),
   ValidationErrorHandler,
   async(req, res, next) => {
     const _id = req.params._id;

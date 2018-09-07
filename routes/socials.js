@@ -64,11 +64,16 @@ router.post('/',
   hasPermissions([ 'createSocialLink ' ]),
   [
     bodyValidation('name')
-      .exists(),
+      .exists({ checkFalsy: true })
+      .withMessage('You need to specify name'),
     bodyValidation('url')
-      .isURL(),
+      .exists({ checkFalsy: true })
+      .withMessage('You need to specify url')
+      .isURL()
+      .withMessage('Given URL is not valid'),
     bodyValidation('icon')
-      .exists()
+      .exists({ checkFalsy: true })
+      .withMessage('You need to specify icon')
   ],
   ValidationErrorHandler,
   async(req, res, next) => {

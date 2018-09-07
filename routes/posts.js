@@ -107,8 +107,8 @@ router.get('/id/:id',
 
 router.get('/url/:url',
   paramValidation('url')
-    .exists()
-    .withMessage('You need to specify valid post url'),
+    .exists({ checkFalsy: true })
+    .withMessage('You need to specify post url'),
   ValidationErrorHandler,
   async(req, res, next) => {
     const url = req.params.url;
@@ -209,7 +209,7 @@ router.post('/',
   hasPermissions([ 'createPost' ]),
   [
     bodyValidation('title')
-      .exists()
+      .exists({ checkFalsy: true })
       .withMessage('You need to specify title')
       .custom(async title => {
         const post = await PostController.getSinglePost({ title });
@@ -219,12 +219,14 @@ router.post('/',
         }
       }),
     bodyValidation('description')
-      .exists()
+      .exists({ checkFalsy: true })
       .withMessage('You need to specify short description'),
     bodyValidation('content')
-      .exists()
+      .exists({ checkFalsy: true })
       .withMessage('You need to specify content'),
     bodyValidation('thumbnail')
+      .exists({ checkFalsy: true })
+      .withMessage('You need to specify thumbnail')
       .isURL({ require_host: false }) // eslint-disable-line camelcase
       .withMessage('Thumbnail is not valid URL')
   ],

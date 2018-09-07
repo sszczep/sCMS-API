@@ -11,7 +11,7 @@ const validateCredentialsAndReturnJWT = async(login, password) => {
     ]}).exec();
 
     if(!user || !await user.validatePassword(password)) {
-      throw new CustomError('BadCredentials', 'Invalid email/password', 403);
+      throw new CustomError('BadCredentials', 'Could not login - invalid credentials', 403);
     }
 
     return user.generateJWT();

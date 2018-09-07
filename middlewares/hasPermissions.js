@@ -11,7 +11,7 @@ module.exports = permissions => (req, res, next) => {
 
   for(const permission of permissions) {
     if(!userPermissions.includes(permission)) {
-      return next(new CustomError('NoPermission', 'You don\'t have permission to do that', 403));
+      return next(new CustomError('NoPermission', 'You do not have permission to do that', 403));
     }
   }
 

@@ -24,10 +24,10 @@ const UserController = require('../controllers/users.js');
 router.post('/login',
   [
     bodyValidation('login')
-      .exists()
+      .exists({ checkFalsy: true })
       .withMessage('You need to specify username or email'),
     bodyValidation('password')
-      .exists()
+      .exists({ checkFalsy: true })
       .withMessage('You need to specify password')
   ],
   ValidationErrorHandler,
@@ -79,6 +79,8 @@ router.post('/register',
         }
       }),
     bodyValidation('username')
+      .exists({ checkFalsy: true })
+      .withMessage('You need to specify username')
       .matches(/^[a-zA-Z0-9]+$/i)
       .withMessage('Invalid format of username')
       .custom(async username => {
@@ -89,10 +91,12 @@ router.post('/register',
         }
       }),
     bodyValidation('password')
+      .exists({ checkFalsy: true })
+      .withMessage('You need to specify password')
       .isLength({ min: 6 })
       .withMessage('Password too short'),
     bodyValidation('fullname')
-      .exists()
+      .exists({ checkFalsy: true })
       .withMessage('You need to specify fullname')
   ],
   ValidationErrorHandler,
