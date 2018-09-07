@@ -65,7 +65,7 @@ User.methods.generateJWT = function() {
     permissions: this.permissions
   }, config.jwtSecret);
 
-  return { token, expiration: exp };
+  return { token, expiration: exp * 1000 };
 };
 
 module.exports = mongoose.model('User', User);
