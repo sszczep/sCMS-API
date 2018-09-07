@@ -12,7 +12,7 @@ const UserController = require('../controllers/users.js');
  * @apiName Login
  * @apiGroup Auth
  *
- * @apiParam (JSON Payload) {String} email Email
+ * @apiParam (JSON Payload) {String} login Email or username
  * @apiParam (JSON Payload) {String} password Password
  *
  * @apiSuccess (Success 200) {Object} data User object
@@ -23,20 +23,19 @@ const UserController = require('../controllers/users.js');
 
 router.post('/login',
   [
-    bodyValidation('email')
-      .isEmail()
-      .withMessage('Invalid format of email')
-      .normalizeEmail(),
+    bodyValidation('login')
+      .exists()
+      .withMessage('You need to specify username or email'),
     bodyValidation('password')
       .exists()
       .withMessage('You need to specify password')
   ],
   ValidationErrorHandler,
   async(req, res, next) => {
-    const { email, password } = req.body;
+    const { login, password } = req.body;
 
     try {
-      const token = await AuthController.validateCredentialsAndReturnJWT(email, password);
+      const token = await AuthController.validateCredentialsAndReturnJWT(login, password);
 
       return res
         .status(200)
@@ -56,6 +55,7 @@ router.post('/login',
  * @apiGroup Auth
  *
  * @apiParam (JSON Payload) {String} email Email
+ * @apiParam (JSON Payload) {String} username Username
  * @apiParam (JSON Payload) {String} password Password
  * @apiParam (JSON Payload) {String} fullname Full name
  *
@@ -76,6 +76,16 @@ router.post('/register',
 
         if(user) {
           throw new Error('Email already in use');
+        }
+      }),
+    bodyValidation('username')
+      .matches(/^[a-zA-Z0-9]+$/i)
+      .withMessage('Invalid format of username')
+      .custom(async username => {
+        const user = await UserController.getUser({ username });
+
+        if(user) {
+          throw new Error('Username already in use');
         }
       }),
     bodyValidation('password')

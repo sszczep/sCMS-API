@@ -10,6 +10,7 @@ before(async() => {
   // create admin account
   await UserController.registerUser({
     email: 'admin@domain.com',
+    username: 'admin',
     password: 'adminPassword',
     fullname: 'Admin account',
     permissions: [ '*' ]

@@ -25,6 +25,7 @@ module.exports = new Promise(resolve => {
           .post('/auth/register')
           .send({
             email: 'test@domain.com',
+            username: 'test',
             password: 'short',
             fullname: 'Testing account'
           });
@@ -37,6 +38,20 @@ module.exports = new Promise(resolve => {
           .post('/auth/register')
           .send({
             email: 'test.domain.com',
+            username: 'test',
+            password: 'password',
+            fullname: 'Testing account'
+          });
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Shouldn\'t register new user - wrong username format', async() => {
+        const { body } = await request(app)
+          .post('/auth/register')
+          .send({
+            email: 'test.domain.com',
+            username: '.:test:.',
             password: 'password',
             fullname: 'Testing account'
           });
@@ -49,6 +64,7 @@ module.exports = new Promise(resolve => {
           .post('/auth/register')
           .send({
             email: 'test@domain.com',
+            username: 'test',
             password: 'password',
             fullname: 'Testing account'
           });
@@ -61,7 +77,22 @@ module.exports = new Promise(resolve => {
           .post('/auth/register')
           .send({
             email: 'test@domain.com',
-            password: 'password'
+            username: 'test1',
+            password: 'password',
+            fullname: 'Testing account'
+          });
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Shouldn\'t register new user - username in use', async() => {
+        const { body } = await request(app)
+          .post('/auth/register')
+          .send({
+            email: 'test1domain.com',
+            username: 'test',
+            password: 'password',
+            fullname: 'Testing account'
           });
 
         expect(body).to.have.property('errors');
@@ -77,11 +108,11 @@ module.exports = new Promise(resolve => {
         expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t login - wrong email', async() => {
+      it('Shouldn\'t login - no user with given username/email', async() => {
         const { body } = await request(app)
           .post('/auth/login')
           .send({
-            email: 'test1@domain.com',
+            login: 'test1@domain.com',
             password: 'password'
           });
 
@@ -92,11 +123,44 @@ module.exports = new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/login')
           .send({
-            email: 'test@domain.com',
+            login: 'test@domain.com',
             password: 'wrongPassword'
           });
 
         expect(body).to.have.property('errors');
+      });
+
+      it('Should login with email', async() => {
+        const { body } = await request(app)
+          .post('/auth/login')
+          .send({
+            login: 'test@domain.com',
+            password: 'password'
+          });
+
+        expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
+      });
+
+      it('Should login with username', async() => {
+        const { body } = await request(app)
+          .post('/auth/login')
+          .send({
+            login: 'test',
+            password: 'password'
+          });
+
+        expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
+      });
+
+      it('Should login with some letters capitalized', async() => {
+        const { body } = await request(app)
+          .post('/auth/login')
+          .send({
+            login: 'tEsT',
+            password: 'password'
+          });
+
+        expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
       });
 
       it('Should login both user and admin successfully and return tokens', async() => {
@@ -111,12 +175,12 @@ module.exports = new Promise(resolve => {
         };
 
         const user = await login({
-          email: 'test@domain.com',
+          login: 'test@domain.com',
           password: 'password'
         });
 
         const admin = await login({
-          email: 'admin@domain.com',
+          login: 'admin@domain.com',
           password: 'adminPassword'
         });
 
