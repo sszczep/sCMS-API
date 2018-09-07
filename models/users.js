@@ -56,12 +56,16 @@ User.methods.validatePassword = async function(password) {
 };
 
 User.methods.generateJWT = function() {
-  return jwt.sign({
+  // expiration date set to 10 minutes
+  const exp = Math.floor(Date.now() / 1000) + (10 * 60);
+
+  const token = jwt.sign({
+    exp,
     _id: this._id,
     permissions: this.permissions
-  }, config.jwtSecret, {
-    expiresIn: 60 * 10
-  });
+  }, config.jwtSecret);
+
+  return { token, expiration: exp };
 };
 
 module.exports = mongoose.model('User', User);
