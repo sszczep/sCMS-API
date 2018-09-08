@@ -21,12 +21,13 @@ module.exports = users => {
           .send();
 
         expect(body.data.username).to.equal(users.user.username);
+        expect(body.data).not.to.have.property('email');
       });
 
       it('Should get user data by username - with Authentication Header', async() => {
         const { body } = await request(app)
           .get(`/users/${users.user.username}`)
-          .set('Authorization', `Bearer ${users.user.tokens}`)
+          .set('Authorization', `Bearer ${users.user.token}`)
           .send();
 
         expect(body.data.username).to.equal(users.user.username);
@@ -47,11 +48,13 @@ module.exports = users => {
           .send();
 
         expect(body.data.username).to.equal(users.user.username);
+        expect(body.data).not.to.have.property('email');
       });
 
       it('Should get user data by _id - with Authentication Header', async() => {
         const { body } = await request(app)
           .get(`/users/${users.user._id}`)
+          .set('Authorization', `Bearer ${users.user.token}`)
           .send();
 
         expect(body.data.username).to.equal(users.user.username);

@@ -40,7 +40,7 @@ router.get('/:phrase',
         return next(new CustomError('NoUser', 'There is no user with given username/_id'));
       }
 
-      const showSensitiveInfo = UserController.canAccessSensitiveInfo(req, user);
+      const showSensitiveInfo = await UserController.canAccessSensitiveInfo(req, user);
 
       return res
         .status(200)

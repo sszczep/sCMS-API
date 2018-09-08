@@ -48,19 +48,16 @@ const canAccessSensitiveInfo = async(req, user) => {
   // get header with Token
   const header = req.get('Authorization');
 
-  // if header exists
-  if(header) {
-    try {
-      const token = AuthController.checkAuthorizationHeaderAndReturnToken(header);
-      const decoded = await AuthController.decodeToken(token);
+  try {
+    const token = await AuthController.checkAuthorizationHeaderAndReturnToken(header);
+    const decoded = await AuthController.decodeToken(token);
 
-      // if token belongs to user making request or user has permission to access others sensitive details
-      if(decoded._id.toString() === user._id.toString() || hasPermissions(decoded.permissions, [ 'detailedInfoAboutOtherUsers' ])) {
-        return true;
-      }
-    } catch(err) {
-      return false;
+    // if token belongs to user making request or user has permission to access others sensitive details
+    if(decoded._id.toString() === user._id.toString() || hasPermissions(decoded.permissions, [ 'detailedInfoAboutOtherUsers' ])) {
+      return true;
     }
+  } catch(err) {
+    return false;
   }
 };
 
