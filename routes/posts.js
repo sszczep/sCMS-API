@@ -70,7 +70,7 @@ router.get('/id/:id',
       const data = await PostController.getSinglePost({ _id: id });
 
       if(!data) {
-        throw new CustomError('NoPostFound', 'Couldn\'t find post with given id', 404);
+        throw new CustomError('NoPostFound', 'Could not find post with given id', 404);
       }
 
       return res
@@ -117,7 +117,7 @@ router.get('/url/:url',
       const data = await PostController.getSinglePost({ friendlyUrl: url });
 
       if(!data) {
-        throw new CustomError('NoPostFound', 'Couldn\'t find post with given url', 404);
+        throw new CustomError('NoPostFound', 'Could not find post with given url', 404);
       }
 
       return res

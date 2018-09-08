@@ -22,7 +22,7 @@ before(async() => {
 (async function() {
   const tokens = await require('./auth.test.js');
 
-  const users = await require('./me.test.js')(tokens);
+  const users = await require('./users.test.js')(tokens);
 
   const posts = await require('./posts.test.js')(users);
 

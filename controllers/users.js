@@ -18,7 +18,22 @@ const registerUser = async data => {
   return response;
 };
 
+const hasPermissions = (userPermissions, permissions) => {
+  if(userPermissions.includes('*')) {
+    return true;
+  }
+
+  for(const permission of permissions) {
+    if(!userPermissions.includes(permission)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 module.exports = {
   getUser,
-  registerUser
+  registerUser,
+  hasPermissions
 };

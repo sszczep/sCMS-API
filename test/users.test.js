@@ -5,45 +5,53 @@ const { expect } = require('chai');
 const request = require('supertest');
 
 module.exports = tokens => new Promise(resolve => {
-  describe('Testing /me', () => {
-    describe('#GET /me', () => {
-      it('Shouldn\'t return user data - no Authorization Header', async() => {
+  describe('Testing /users', () => {
+    describe('#GET /users/username/:username', () => {
+      it('Shouldn\'t get user data - no user found', async() => {
         const { body } = await request(app)
-          .get('/me')
+          .get('/users/username/lulz')
           .send();
 
         expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t return user data - outdated/wrong token', async() => {
+      it('Should get user data - without Authentication Header', async() => {
         const { body } = await request(app)
-          .get('/me')
-          .set('Authorization', 'Bearer blah_blah_blah')
+          .get('/users/username/test')
           .send();
 
-        expect(body).to.have.property('errors');
+        expect(body.data.username).to.equal('test');
+      });
+
+      it('Should get user data - with Authentication Header', async() => {
+        const { body } = await request(app)
+          .get('/users/username/test')
+          .set('Authorization', `Bearer ${tokens.user}`)
+          .send();
+
+        expect(body.data).to.have.property('email');
       });
 
       it('Should return both user and admin data', async() => {
         const getData = async data => {
           const { body } = await request(app)
-            .get('/me')
+            .get(`/users/username/${data.username}`)
             .set('Authorization', `Bearer ${data.token}`)
             .send();
 
-          expect(body.data.email).to.equal(data.email);
+          expect(body.data.username).to.equal(data.username);
 
           return body.data;
         };
 
         const user = await getData({
           token: tokens.user,
-          email: 'test@domain.com'
+          username: 'test'
         });
 
         const admin = await getData({
           token: tokens.admin,
-          email: 'admin@domain.com'
+          username: 'admin'
         });
 
         return resolve({

@@ -8,6 +8,15 @@ const AuthController = require('../controllers/auth.js');
 const UserController = require('../controllers/users.js');
 
 /**
+ * @apiDefine AuthorizationHeader
+ * @apiHeader {String} Authorization Authorization header
+ * @apiHeaderExample {json} Authorization example:
+ *  {
+ *    "Authorization": "Bearer <jwt token here>"
+ *  }
+ */
+
+/**
  * @api {post} /auth/login Login into site using credentials (email and password)
  * @apiName Login
  * @apiGroup Auth
@@ -18,7 +27,12 @@ const UserController = require('../controllers/users.js');
  * @apiSuccess (Success 200) {Object} data
  * @apiSuccess (Success 200) {String} data.token JWT token
  * @apiSuccess (Success 200) {String} data.expiration JWT token expiration date
- * @apiSuccess (Success 200) {Object} data.user User details
+ * @apiSuccess (Success 200) {Object} data.user User's details
+ * @apiSuccess (Success 200) {String} data.user.fullname Name
+ * @apiSuccess (Success 200) {String} data.user.username Username
+ * @apiSuccess (Success 200) {String} data.user.email Email
+ * @apiSuccess (Success 200) {String} data.user.avatar Avatar
+ * @apiSuccess (Success 200) {Array} data.user.permissions Permissions
  *
  * @apiUse ErrorObject
  */
@@ -37,14 +51,22 @@ router.post('/login',
     const { login, password } = req.body;
 
     try {
-      const data = await AuthController.validateCredentialsAndReturnData(login, password);
-
-      data.user.password = undefined;
+      const { token, expiration, user } = await AuthController.validateCredentialsAndReturnData(login, password);
 
       return res
         .status(200)
         .json({
-          data
+          data: {
+            token,
+            expiration,
+            user: {
+              fullname: user.fullname,
+              username: user.username,
+              email: user.name,
+              avatar: user.avatar,
+              permissions: user.permissions
+            }
+          }
         });
     } catch(err) {
       return next(err);
@@ -59,12 +81,17 @@ router.post('/login',
  * @apiParam (JSON Payload) {String} email Email
  * @apiParam (JSON Payload) {String} username Username
  * @apiParam (JSON Payload) {String} password Password
- * @apiParam (JSON Payload) {String} fullname Full name
+ * @apiParam (JSON Payload) {String} fullname Name
  *
  * @apiSuccess (Success 201) {Object} data
  * @apiSuccess (Success 201) {String} data.token JWT token
  * @apiSuccess (Success 201) {String} data.expiration JWT token expiration date
- * @apiSuccess (Success 201) {Object} data.user User details
+ * @apiSuccess (Success 201) {Object} data.user User's details
+ * @apiSuccess (Success 201) {String} data.user.fullname Name
+ * @apiSuccess (Success 201) {String} data.user.username Username
+ * @apiSuccess (Success 201) {String} data.user.email Email
+ * @apiSuccess (Success 201) {String} data.user.avatar Avatar
+ * @apiSuccess (Success 201) {Array} data.user.permissions Permissions
  *
  * @apiUse ErrorObject
  */
@@ -109,14 +136,18 @@ router.post('/register',
       const user = await UserController.registerUser(req.body);
       const data = user.generateJWT();
 
-      user.password = undefined;
-
       return res
         .status(201)
         .json({
           data: {
             ...data,
-            user
+            user: {
+              fullname: user.fullname,
+              username: user.username,
+              email: user.email,
+              avatar: user.avatar,
+              permissions: user.permissions
+            }
           }
         });
     } catch(err) {
