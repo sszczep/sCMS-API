@@ -3,7 +3,7 @@
 const UserModel = require('../models/users.js');
 const CustomError = require('../utils/CustomError.js');
 
-const validateCredentialsAndReturnJWT = async(login, password) => {
+const validateCredentialsAndReturnData = async(login, password) => {
   try {
     const user = await UserModel.findOne({ $or: [
       { email: { $regex: new RegExp(`^${login}$`), $options: 'i' }},
@@ -14,12 +14,15 @@ const validateCredentialsAndReturnJWT = async(login, password) => {
       throw new CustomError('BadCredentials', 'Could not login - invalid credentials', 403);
     }
 
-    return user.generateJWT();
+    return {
+      ...user.generateJWT(),
+      user
+    };
   } catch(err) {
     throw err;
   }
 };
 
 module.exports = {
-  validateCredentialsAndReturnJWT
+  validateCredentialsAndReturnData
 };

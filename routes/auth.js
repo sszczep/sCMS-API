@@ -15,9 +15,10 @@ const UserController = require('../controllers/users.js');
  * @apiParam (JSON Payload) {String} login Email or username
  * @apiParam (JSON Payload) {String} password Password
  *
- * @apiSuccess (Success 200) {Object} data User object
+ * @apiSuccess (Success 200) {Object} data
  * @apiSuccess (Success 200) {String} data.token JWT token
  * @apiSuccess (Success 200) {String} data.expiration JWT token expiration date
+ * @apiSuccess (Success 200) {Object} data.user User details
  *
  * @apiUse ErrorObject
  */
@@ -36,7 +37,9 @@ router.post('/login',
     const { login, password } = req.body;
 
     try {
-      const data = await AuthController.validateCredentialsAndReturnJWT(login, password);
+      const data = await AuthController.validateCredentialsAndReturnData(login, password);
+
+      data.user.password = undefined;
 
       return res
         .status(200)
@@ -48,17 +51,23 @@ router.post('/login',
     }
   });
 
-// @api {post} /auth/register Register new user
-// @apiName Register
-// @apiGroup Auth
-// @apiParam (JSON Payload) {String} email Email
-// @apiParam (JSON Payload) {String} username Username
-// @apiParam (JSON Payload) {String} password Password
-// @apiParam (JSON Payload) {String} fullname Full name
-// @apiSuccess (Success 201) {Object} data User object
-// @apiSuccess (Success 201) {String} data.token JWT token
-// @apiSuccess (Success 201) {String} data.expiration JWT token expiration date
-// @apiUse ErrorObject
+/**
+ * @api {post} /auth/register Register new user
+ * @apiName Register
+ * @apiGroup Auth
+ *
+ * @apiParam (JSON Payload) {String} email Email
+ * @apiParam (JSON Payload) {String} username Username
+ * @apiParam (JSON Payload) {String} password Password
+ * @apiParam (JSON Payload) {String} fullname Full name
+ *
+ * @apiSuccess (Success 201) {Object} data
+ * @apiSuccess (Success 201) {String} data.token JWT token
+ * @apiSuccess (Success 201) {String} data.expiration JWT token expiration date
+ * @apiSuccess (Success 201) {Object} data.user User details
+ *
+ * @apiUse ErrorObject
+ */
 
 router.post('/register',
   [
@@ -100,10 +109,15 @@ router.post('/register',
       const user = await UserController.registerUser(req.body);
       const data = user.generateJWT();
 
+      user.password = undefined;
+
       return res
         .status(201)
         .json({
-          data
+          data: {
+            ...data,
+            user
+          }
         });
     } catch(err) {
       return next(err);
