@@ -13,6 +13,8 @@ const CustomError = require('../utils/CustomError.js');
  * @apiName GetUser
  * @apiGroup Users
  *
+ * @apiUse AuthorizationHeader
+ *
  * @apiParam (Route Parameter) {String} url Url of post to return
  *
  * @apiSuccess (Success 200) {Object} user User's details
@@ -20,6 +22,9 @@ const CustomError = require('../utils/CustomError.js');
  * @apiSuccess (Success 200) {String} user.username Username
  * @apiSuccess (Success 200) {String} user.avatar Avatar
  * @apiSuccess (Success 200) {String} user.bio Bio (short description)
+ * @apiSuccess (Success 200) {String} user.email Email (only if authorization header is specified and user has permission to see that or it's his account)
+ * @apiSuccess (Success 200) {Array} user.permissions Permissions (only if authorization header is specified and user has permission to see that or it's his account)
+ * @apiSuccess (Success 200) {String} user._id User ID (only if authorization header is specified and user has permission to see that or it's his account)
  *
  * @apiUse ErrorObject
  */
