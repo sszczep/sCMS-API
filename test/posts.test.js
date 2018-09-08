@@ -133,44 +133,34 @@ module.exports = users => new Promise(resolve => {
       });
     });
 
-    describe('#GET /posts/id/:id', () => {
-      it('Shouldn\'t get post - invalid id', async() => {
+    describe('#GET /posts/:phrase', () => {
+      it('Shouldn\'t get post by url - there is no post with given url', async() => {
         const { body } = await request(app)
-          .get('/posts/id/invalidID')
+          .get('/posts/you-wont-find-me')
           .send();
 
         expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t get post - there is no post with given id', async() => {
+      it('Should get post by url', async() => {
         const { body } = await request(app)
-          .get('/posts/id/5b8bd1658087c227e50a09d9')
-          .send();
-
-        expect(body).to.have.property('errors');
-      });
-
-      it('Should get post', async() => {
-        const { body } = await request(app)
-          .get(`/posts/id/${createdPosts[0]._id}`)
+          .get(`/posts/${createdPosts[0].friendlyUrl}`)
           .send();
 
         expect(JSON.stringify(body.data)).to.equal(JSON.stringify(createdPosts[0]));
       });
-    });
 
-    describe('#GET /posts/url/:url', () => {
-      it('Shouldn\'t get post - there is no post with given url', async() => {
+      it('Shouldn\'t get post by _id - there is no post with given id', async() => {
         const { body } = await request(app)
-          .get('/posts/url/i-dont-exist')
+          .get('/posts/5b8bd1658087c227e50a09d9')
           .send();
 
         expect(body).to.have.property('errors');
       });
 
-      it('Should get post', async() => {
+      it('Should get post by _id', async() => {
         const { body } = await request(app)
-          .get(`/posts/url/${createdPosts[0].friendlyUrl}`)
+          .get(`/posts/${createdPosts[0]._id}`)
           .send();
 
         expect(JSON.stringify(body.data)).to.equal(JSON.stringify(createdPosts[0]));

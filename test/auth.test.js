@@ -171,7 +171,7 @@ module.exports = new Promise(resolve => {
 
           expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
 
-          return body.data.token;
+          return { token: body.data.token, ...body.data.user };
         };
 
         const user = await login({

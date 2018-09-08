@@ -4,68 +4,59 @@ const app = require('../app.js');
 const { expect } = require('chai');
 const request = require('supertest');
 
-module.exports = tokens => new Promise(resolve => {
+module.exports = users => {
   describe('Testing /users', () => {
-    describe('#GET /users/username/:username', () => {
-      it('Shouldn\'t get user data - no user found', async() => {
+    describe('#GET /users/:phrase', () => {
+      it('Shouldn\'t get user data by username - no user found', async() => {
         const { body } = await request(app)
-          .get('/users/username/lulz')
+          .get('/users/lulz')
           .send();
 
         expect(body).to.have.property('errors');
       });
 
-      it('Should get user data - without Authentication Header', async() => {
+      it('Should get user data by username - without Authentication Header', async() => {
         const { body } = await request(app)
-          .get('/users/username/test')
+          .get(`/users/${users.user.username}`)
           .send();
 
-        expect(body.data.username).to.equal('test');
+        expect(body.data.username).to.equal(users.user.username);
       });
 
-      it('Should get user data - with Authentication Header', async() => {
+      it('Should get user data by username - with Authentication Header', async() => {
         const { body } = await request(app)
-          .get('/users/username/test')
-          .set('Authorization', `Bearer ${tokens.user}`)
+          .get(`/users/${users.user.username}`)
+          .set('Authorization', `Bearer ${users.user.tokens}`)
           .send();
 
+        expect(body.data.username).to.equal(users.user.username);
         expect(body.data).to.have.property('email');
       });
 
-      it('Should return both user and admin data', async() => {
-        const getData = async data => {
-          const { body } = await request(app)
-            .get(`/users/username/${data.username}`)
-            .set('Authorization', `Bearer ${data.token}`)
-            .send();
+      it('Shouldn\'t get user data by _id - no user found', async() => {
+        const { body } = await request(app)
+          .get('/users/invalid_id')
+          .send();
 
-          expect(body.data.username).to.equal(data.username);
+        expect(body).to.have.property('errors');
+      });
 
-          return body.data;
-        };
+      it('Should get user data by _id - without Authentication Header', async() => {
+        const { body } = await request(app)
+          .get(`/users/${users.user._id}`)
+          .send();
 
-        const user = await getData({
-          token: tokens.user,
-          username: 'test'
-        });
+        expect(body.data.username).to.equal(users.user.username);
+      });
 
-        const admin = await getData({
-          token: tokens.admin,
-          username: 'admin'
-        });
+      it('Should get user data by _id - with Authentication Header', async() => {
+        const { body } = await request(app)
+          .get(`/users/${users.user._id}`)
+          .send();
 
-        return resolve({
-          user: {
-            ...user,
-            token: tokens.user
-          },
-
-          admin: {
-            ...admin,
-            token: tokens.admin
-          }
-        });
+        expect(body.data.username).to.equal(users.user.username);
+        expect(body.data).to.have.property('email');
       });
     });
   });
-});
+};

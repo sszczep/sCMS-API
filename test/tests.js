@@ -20,9 +20,9 @@ before(async() => {
 /* eslint global-require: "off"*/
 
 (async function() {
-  const tokens = await require('./auth.test.js');
+  const users = await require('./auth.test.js');
 
-  const users = await require('./users.test.js')(tokens);
+  require('./users.test.js')(users);
 
   const posts = await require('./posts.test.js')(users);
 

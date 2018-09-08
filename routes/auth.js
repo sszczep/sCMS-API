@@ -33,6 +33,7 @@ const UserController = require('../controllers/users.js');
  * @apiSuccess (Success 200) {String} data.user.email Email
  * @apiSuccess (Success 200) {String} data.user.avatar Avatar
  * @apiSuccess (Success 200) {Array} data.user.permissions Permissions
+ * @apiSuccess (Success 200) {String} data.user._id User ID
  *
  * @apiUse ErrorObject
  */
@@ -64,7 +65,8 @@ router.post('/login',
               username: user.username,
               email: user.name,
               avatar: user.avatar,
-              permissions: user.permissions
+              permissions: user.permissions,
+              _id: user._id
             }
           }
         });
@@ -92,6 +94,7 @@ router.post('/login',
  * @apiSuccess (Success 201) {String} data.user.email Email
  * @apiSuccess (Success 201) {String} data.user.avatar Avatar
  * @apiSuccess (Success 201) {Array} data.user.permissions Permissions
+ * @apiSuccess (Success 201) {String} data.user._id User ID
  *
  * @apiUse ErrorObject
  */
@@ -146,7 +149,8 @@ router.post('/register',
               username: user.username,
               email: user.email,
               avatar: user.avatar,
-              permissions: user.permissions
+              permissions: user.permissions,
+              _id: user._id
             }
           }
         });

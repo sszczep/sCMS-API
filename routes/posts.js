@@ -37,11 +37,11 @@ router.get('/count', async(req, res, next) => {
 });
 
 /**
- * @api {get} /posts/id/:id Get a single post by id
+ * @api {get} /posts/:phrase Get a single post by _id or url
  * @apiName GetPost
  * @apiGroup Posts
  *
- * @apiParam (Route Parameter) {String} id ID of post to return
+ * @apiParam (Route Parameter) {String} phrase _id or url of post
  *
  * @apiSuccess (Success 200) {Object} data
  * @apiSuccess (Success 200) {String} data.title Title of post
@@ -58,66 +58,17 @@ router.get('/count', async(req, res, next) => {
  * @apiUse ErrorObject
  */
 
-router.get('/id/:id',
-  paramValidation('id')
-    .isMongoId()
+router.get('/:phrase',
+  paramValidation('phrase')
+    .exists({ checkFalsy: true })
     .withMessage('You need to specify valid post id'),
   ValidationErrorHandler,
   async(req, res, next) => {
-    const id = req.params.id;
-
     try {
-      const data = await PostController.getSinglePost({ _id: id });
+      const data = await PostController.getSinglePostByPhrase(req.params.phrase);
 
       if(!data) {
-        throw new CustomError('NoPostFound', 'Could not find post with given id', 404);
-      }
-
-      return res
-        .status(200)
-        .json({
-          data
-        });
-    } catch(err) {
-      return next(err);
-    }
-  });
-
-/**
-   * @api {get} /posts/url/:url Get a single post by url
-   * @apiName GetPost
-   * @apiGroup Posts
-   *
-   * @apiParam (Route Parameter) {String} url Url of post to return
-   *
-   * @apiSuccess (Success 200) {Object} data
-   * @apiSuccess (Success 200) {String} data.title Title of post
-   * @apiSuccess (Success 200) {String} data.description Description of post
-   * @apiSuccess (Success 200) {String} data.content Content of post
-   * @apiSuccess (Success 200) {String} data.thumbnail Thumbail of post
-   * @apiSuccess (Success 200) {String} data.friendlyUrl Friendly url of post
-   * @apiSuccess (Success 200) {String} data.created Date of creation of post
-   * @apiSuccess (Success 200) {String} data._id ID of post
-   * @apiSuccess (Success 200) {Object} data.author Author of post
-   * @apiSuccess (Success 200) {String} data.author.fullname Full name of author
-   * @apiSuccess (Success 200) {String} data.author._id ID of author
-   *
-   * @apiUse ErrorObject
-   */
-
-router.get('/url/:url',
-  paramValidation('url')
-    .exists({ checkFalsy: true })
-    .withMessage('You need to specify post url'),
-  ValidationErrorHandler,
-  async(req, res, next) => {
-    const url = req.params.url;
-
-    try {
-      const data = await PostController.getSinglePost({ friendlyUrl: url });
-
-      if(!data) {
-        throw new CustomError('NoPostFound', 'Could not find post with given url', 404);
+        throw new CustomError('NoPostFound', 'Could not find post with given _id/url', 404);
       }
 
       return res
