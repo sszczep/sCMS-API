@@ -22,7 +22,7 @@ const createNewPost = async data => {
 
   response.__v = undefined; // eslint-disable-line no-underscore-dangle
 
-  await response.populate('author', '_id fullname').execPopulate();
+  await response.populate('author', '_id fullname username').execPopulate();
 
   return response;
 };
@@ -33,7 +33,7 @@ const getPostsCount = async() =>
 const getSinglePost = async data =>
   await PostModel
     .findOne(data)
-    .populate('author', '_id fullname')
+    .populate('author', '_id fullname username')
     .select('-__v')
     .lean()
     .exec();
@@ -44,7 +44,7 @@ const getPostsList = async params => {
 
   return await PostModel
     .find()
-    .populate('author', '_id fullname')
+    .populate('author', '_id fullname username')
     .limit(limit)
     .skip(offset)
     .sort('-created')
