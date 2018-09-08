@@ -51,7 +51,7 @@ module.exports = new Promise(resolve => {
           .post('/auth/register')
           .send({
             email: 'test.domain.com',
-            username: '.:test:.',
+            username: '1test1',
             password: 'password',
             fullname: 'Testing account'
           });

@@ -76,7 +76,7 @@ router.post('/register',
     bodyValidation('username')
       .exists({ checkFalsy: true })
       .withMessage('You need to specify username')
-      .matches(/^[a-zA-Z0-9]+$/i)
+      .matches(/^[a-zA-Z]+$/i)
       .withMessage('Invalid format of username')
       .custom(async username => {
         const user = await UserController.getUser({ username });
