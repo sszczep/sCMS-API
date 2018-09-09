@@ -27,6 +27,7 @@ const CustomError = require('../utils/CustomError.js');
  * @apiSuccess (Success 200) {String} data.posts.title Title
  * @apiSuccess (Success 200) {String} data.posts.description Description
  * @apiSuccess (Success 200) {String} data.posts.thumbnail Thumbnail
+ * @apiSuccess (Success 200) {String} data.posts.created Date of creation
  * @apiSuccess (Success 200) {String} data.posts.url Url
  *
  * @apiUse ErrorObject
@@ -52,7 +53,7 @@ router.get('/:username',
         },
         populate: {
           path: 'posts',
-          select: '-_id title description thumbnail url'
+          select: '-_id title description thumbnail created url'
         }
       });
 
