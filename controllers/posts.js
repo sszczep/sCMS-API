@@ -1,31 +1,30 @@
 'use strict';
 
-const { Types: { ObjectId: { isValid: isValidID }}} = require('mongoose');
 const PostModel = require('../models/posts.js');
 const slugify = require('slugify');
+const UserController = require('./users.js');
+const filterObject = require('../utils/filterObject.js');
 
-const findContaining = async phrase =>
+const findContaining = async data =>
   await PostModel
-    .find({ title: { $regex: phrase, $options: 'i' }})
-    .limit(10)
+    .find({ title: { $regex: data.phrase, $options: 'i' }})
+    .select(data.select || '')
+    .setOptions(data.options || {})
     .sort('-created')
-    .select('friendlyUrl title thumbnail description')
-    .lean()
+    .populate(data.populate || [])
     .exec();
 
 const createNewPost = async data => {
-  const friendlyTitle = slugify(data.title, { lower: true });
-
-  data.friendlyUrl = data.friendlyUrl || friendlyTitle;
+  data.toCreate.url = data.toCreate.url || slugify(data.toCreate.title, { lower: true });
 
   const response = await PostModel
-    .create(data);
+    .create(data.toCreate);
 
-  response.__v = undefined; // eslint-disable-line no-underscore-dangle
+  await UserController.addPost(data.toCreate.author, response._id);
 
-  await response.populate('author', '_id fullname username').execPopulate();
+  await response.populate(data.populate || []).execPopulate();
 
-  return response;
+  return filterObject(response, data.select);
 };
 
 const getPostsCount = async() =>
@@ -33,43 +32,25 @@ const getPostsCount = async() =>
 
 const getSinglePost = async data =>
   await PostModel
-    .findOne(data)
-    .populate('author', '_id fullname username')
-    .select('-__v')
-    .lean()
+    .findOne(data.conditions)
+    .select(data.select || '')
+    .setOptions(data.options || {})
+    .populate(data.populate || [])
     .exec();
 
-const getSinglePostByPhrase = async phrase =>
+const getPostsList = async data =>
   await PostModel
-    .findOne({ $or: [
-      { friendlyUrl: phrase },
-      { _id: isValidID(phrase) ? phrase : undefined }
-    ]})
-    .populate('author', '_id fullname username')
-    .select(`-__v`)
-    .lean()
-    .exec();
-
-const getPostsList = async params => {
-  const limit = Number(params.limit) || 0;
-  const offset = Number(params.offset) || 0;
-
-  return await PostModel
     .find()
-    .populate('author', '_id fullname username')
-    .limit(limit)
-    .skip(offset)
+    .select(data.select || '')
+    .setOptions(data.options || {})
     .sort('-created')
-    .select(`-__v ${params.preview ? '-content' : ''}`)
-    .lean()
+    .populate(data.populate || [])
     .exec();
-};
 
 module.exports = {
   findContaining,
   createNewPost,
   getPostsCount,
   getSinglePost,
-  getSinglePostByPhrase,
   getPostsList
 };

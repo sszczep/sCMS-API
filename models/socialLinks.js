@@ -18,4 +18,10 @@ const SocialLink = new mongoose.Schema({
   }
 });
 
+SocialLink.set('toObject', {
+  transform(doc, ret) {
+    delete ret.__v; // eslint-disable-line
+  }
+});
+
 module.exports = mongoose.model('SocialLink', SocialLink);

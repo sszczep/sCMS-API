@@ -14,4 +14,10 @@ const Option = new mongoose.Schema({
   }
 });
 
+Option.set('toObject', {
+  transform(doc, ret) {
+    delete ret.__v; // eslint-disable-line
+  }
+});
+
 module.exports = mongoose.model('Option', Option);

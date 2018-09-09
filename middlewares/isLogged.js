@@ -3,13 +3,10 @@
 const AuthController = require('../controllers/auth.js');
 
 module.exports = async(req, res, next) => {
-  const header = req.get('Authorization');
-
   try {
-    const token = AuthController.checkAuthorizationHeaderAndReturnToken(header);
-    const decoded = await AuthController.decodeToken(token);
+    const token = AuthController.checkAuthorizationHeaderAndReturnToken(req);
 
-    req.user = decoded;
+    req.user = await AuthController.decodeToken(token);
 
     return next();
   } catch(err) {

@@ -4,10 +4,10 @@ const app = require('../app.js');
 const { expect } = require('chai');
 const request = require('supertest');
 
-module.exports = posts => {
+module.exports = (posts, users) => {
   describe('Testing /autocomplete', () => {
     describe('#GET /autocomplete/:phrase', () => {
-      it('Shouldn\'t return data - no phrase', async() => {
+      it('Should not return data - no phrase', async() => {
         const { body } = await request(app)
           .get('/autocomplete')
           .send();
@@ -15,7 +15,7 @@ module.exports = posts => {
         expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t return data - phrase too short', async() => {
+      it('Should not return data - phrase too short', async() => {
         const { body } = await request(app)
           .get('/autocomplete/Te')
           .send();
@@ -23,12 +23,12 @@ module.exports = posts => {
         expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t return data - phrase not occuring anywhere', async() => {
+      it('Should not return data - phrase not occuring anywhere', async() => {
         const { body } = await request(app)
           .get('/autocomplete/You won\'t find me')
           .send();
 
-        expect(body.data.length).to.equal(0);
+        expect(body.data.posts.length).to.equal(0);
       });
 
       it('Should return one post', async() => {
@@ -36,29 +36,58 @@ module.exports = posts => {
           .get(`/autocomplete/${posts[0].title}`)
           .send();
 
-        expect(body.data.length).to.equal(1);
+        expect(body.data.posts.length).to.equal(1);
 
-        expect(body.data[0].name).to.equal(posts[0].title);
-        expect(body.data[0].subtext).to.equal(posts[0].description);
-        expect(body.data[0].avatar).to.equal(posts[0].thumbnail);
-        expect(body.data[0].url).to.equal(posts[0].friendlyUrl);
+        expect(body.data.posts[0].title).to.equal(posts[0].title);
+        expect(body.data.posts[0].description).to.equal(posts[0].description);
+        expect(body.data.posts[0].thumbnail).to.equal(posts[0].thumbnail);
+        expect(body.data.posts[0].url).to.equal(posts[0].url);
+
+        // author testing
+        expect(body.data.posts[0].author.fullname).to.equal(users.admin.fullname);
+
+        // response should not contain _id and __v
+        expect(body.data.posts[0]).not.to.have.property('_id');
+        expect(body.data.posts[0]).not.to.have.property('__v');
+        expect(body.data.posts[0].author).not.to.have.property('_id');
+        expect(body.data.posts[0].author).not.to.have.property('__v');
       });
 
-      it('Should return five posts', async() => {
+      it('Should return five posts and one user', async() => {
         const { body } = await request(app)
-          .get(`/autocomplete/Testing posts`)
+          .get(`/autocomplete/test`)
           .send();
 
-        expect(body.data.length).to.equal(5);
+        expect(body.data.posts.length).to.equal(5);
+        expect(body.data.users.length).to.equal(1);
 
-        body.data.reverse();
+        body.data.posts.reverse();
 
+        // testing posts
         for(let i = 0; i < body.data.length; i++) {
-          expect(body.data[i].name).to.equal(posts[i].title);
-          expect(body.data[i].subtext).to.equal(posts[i].description);
-          expect(body.data[i].avatar).to.equal(posts[i].thumbnail);
-          expect(body.data[i].url).to.equal(posts[i].friendlyUrl);
+          expect(body.data.posts[i].title).to.equal(posts[i].title);
+          expect(body.data.posts[i].description).to.equal(posts[i].description);
+          expect(body.data.posts[i].thumbnail).to.equal(posts[i].thumbnail);
+          expect(body.data.posts[i].url).to.equal(posts[i].url);
+
+          // author testing
+          expect(body.data.posts[i].author.fullname).to.equal(users.admin.fullname);
+
+          // response should not contain _id and __v
+          expect(body.data.posts[i]).not.to.have.property('_id');
+          expect(body.data.posts[i]).not.to.have.property('__v');
+          expect(body.data.posts[i].author).not.to.have.property('_id');
+          expect(body.data.posts[i].author).not.to.have.property('__v');
         }
+
+        // testing users
+        expect(body.data.users[0].fullname).to.equal(users.user.fullname);
+        expect(body.data.users[0].username).to.equal(users.user.username);
+        expect(body.data.users[0].avatar).to.equal(users.user.avatar);
+
+        // response should not contain _id and __v
+        expect(body.data.users[0]).not.to.have.property('_id');
+        expect(body.data.users[0]).not.to.have.property('__v');
       });
     });
   });

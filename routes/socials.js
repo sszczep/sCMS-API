@@ -14,17 +14,21 @@ const SocialsController = require('../controllers/socials.js');
  * @apiGroup Social links
  *
  * @apiSuccess (Success 200) {Object[]} data Array of social links
- * @apiSuccess (Success 200) {String} data.name Name of social link
- * @apiSuccess (Success 200) {String} data.url Url of social link
- * @apiSuccess (Success 200) {String} data.icon Icon for social link
- * @apiSuccess (Success 200) {String} data._id ID of social link
+ * @apiSuccess (Success 200) {String} data.name Name
+ * @apiSuccess (Success 200) {String} data.url Target Url
+ * @apiSuccess (Success 200) {String} data.icon Icon
  *
  * @apiUse ErrorObject
  */
 
 router.get('/', async(req, res, next) => {
   try {
-    const data = await SocialsController.getSocialLinks();
+    const data = await SocialsController.getSocialLinks({
+      select: '-_id name url icon',
+      options: {
+        lean: true
+      }
+    });
 
     return res
       .status(200)
@@ -47,38 +51,49 @@ router.use(isLogged);
  *
  * @apiUse AuthorizationHeader
  *
- * @apiParam (JSON Payload) {String} name Name of social link
- * @apiParam (JSON Payload) {String} url Url of social link
- * @apiParam (JSON Payload) {String} icon Icon of social link
+ * @apiParam (JSON Payload) {String} name Name
+ * @apiParam (JSON Payload) {String} url Target Url
+ * @apiParam (JSON Payload) {String} icon Icon
  *
  * @apiSuccess (Success 201) {Object} data
- * @apiSuccess (Success 201) {String} data.name Name of social link
- * @apiSuccess (Success 201) {String} data.url Url of social link
- * @apiSuccess (Success 201) {String} data.icon Icon of social link
- * @apiSuccess (Success 201) {String} data._id ID of social link
+ * @apiSuccess (Success 201) {String} data.name Name
+ * @apiSuccess (Success 201) {String} data.url Target Url
+ * @apiSuccess (Success 201) {String} data.icon Icon
  *
  * @apiUse ErrorObject
  */
 
 router.post('/',
-  hasPermissions([ 'createSocialLink ' ]),
+  hasPermissions([ 'createSocialLink' ]),
   [
     bodyValidation('name')
+      .trim()
       .exists({ checkFalsy: true })
       .withMessage('You need to specify name'),
     bodyValidation('url')
+      .trim()
       .exists({ checkFalsy: true })
       .withMessage('You need to specify url')
       .isURL()
       .withMessage('Given URL is not valid'),
     bodyValidation('icon')
+      .trim()
       .exists({ checkFalsy: true })
       .withMessage('You need to specify icon')
   ],
   ValidationErrorHandler,
   async(req, res, next) => {
+    const { name, url, icon } = req.body;
+
     try {
-      const data = await SocialsController.createSocialLink(req.body);
+      const data = await SocialsController.createSocialLink({
+        toCreate: {
+          name,
+          url,
+          icon
+        },
+        select: '-_id name url icon'
+      });
 
       return res
         .status(201)

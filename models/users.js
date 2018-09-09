@@ -33,9 +33,19 @@ const User = new mongoose.Schema({
     type: String,
     default: ''
   },
+  posts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post'
+  }],
   permissions: {
     type: Array,
     default: []
+  }
+});
+
+User.set('toObject', {
+  transform(doc, ret) {
+    delete ret.__v; // eslint-disable-line
   }
 });
 
@@ -62,6 +72,7 @@ User.methods.generateJWT = function() {
   const token = jwt.sign({
     exp,
     _id: this._id,
+    username: this.username,
     permissions: this.permissions
   }, config.jwtSecret);
 

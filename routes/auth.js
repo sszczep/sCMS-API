@@ -17,11 +17,11 @@ const UserController = require('../controllers/users.js');
  */
 
 /**
- * @api {post} /auth/login Login into site using credentials (email and password)
+ * @api {post} /auth/login Login into site using credentials (username/email and password)
  * @apiName Login
  * @apiGroup Auth
  *
- * @apiParam (JSON Payload) {String} login Email or username
+ * @apiParam (JSON Payload) {String} login Username or Email
  * @apiParam (JSON Payload) {String} password Password
  *
  * @apiSuccess (Success 200) {Object} data
@@ -32,8 +32,8 @@ const UserController = require('../controllers/users.js');
  * @apiSuccess (Success 200) {String} data.user.username Username
  * @apiSuccess (Success 200) {String} data.user.email Email
  * @apiSuccess (Success 200) {String} data.user.avatar Avatar
+ * @apiSuccess (Success 200) {String} data.user.bio Bio
  * @apiSuccess (Success 200) {Array} data.user.permissions Permissions
- * @apiSuccess (Success 200) {String} data.user._id User ID
  *
  * @apiUse ErrorObject
  */
@@ -41,6 +41,7 @@ const UserController = require('../controllers/users.js');
 router.post('/login',
   [
     bodyValidation('login')
+      .trim()
       .exists({ checkFalsy: true })
       .withMessage('You need to specify username or email'),
     bodyValidation('password')
@@ -52,7 +53,13 @@ router.post('/login',
     const { login, password } = req.body;
 
     try {
-      const { token, expiration, user } = await AuthController.validateCredentialsAndReturnData(login, password);
+      const { token, expiration, user } = await AuthController.validateCredentialsAndReturnData({
+        credentials: {
+          login,
+          password
+        },
+        select: '-_id fullname username email avatar bio permissions'
+      });
 
       return res
         .status(200)
@@ -60,14 +67,7 @@ router.post('/login',
           data: {
             token,
             expiration,
-            user: {
-              fullname: user.fullname,
-              username: user.username,
-              email: user.name,
-              avatar: user.avatar,
-              permissions: user.permissions,
-              _id: user._id
-            }
+            user
           }
         });
     } catch(err) {
@@ -81,8 +81,8 @@ router.post('/login',
  * @apiGroup Auth
  *
  * @apiParam (JSON Payload) {String} email Email
- * @apiParam (JSON Payload) {String} username Username
- * @apiParam (JSON Payload) {String} password Password
+ * @apiParam (JSON Payload) {String{4..}} username Username
+ * @apiParam (JSON Payload) {String{6..}} password Password
  * @apiParam (JSON Payload) {String} fullname Name
  *
  * @apiSuccess (Success 201) {Object} data
@@ -93,8 +93,8 @@ router.post('/login',
  * @apiSuccess (Success 201) {String} data.user.username Username
  * @apiSuccess (Success 201) {String} data.user.email Email
  * @apiSuccess (Success 201) {String} data.user.avatar Avatar
+ * @apiSuccess (Success 201) {String} data.user.bio Bio
  * @apiSuccess (Success 201) {Array} data.user.permissions Permissions
- * @apiSuccess (Success 201) {String} data.user._id User ID
  *
  * @apiUse ErrorObject
  */
@@ -102,57 +102,75 @@ router.post('/login',
 router.post('/register',
   [
     bodyValidation('email')
+      .trim()
       .isEmail()
       .withMessage('Invalid format of email')
       .normalizeEmail()
       .custom(async email => {
-        const user = await UserController.getUser({ email });
+        const user = await UserController.getUser({
+          conditions: { email },
+          select: '_id',
+          options: {
+            lean: true
+          }
+        });
 
         if(user) {
           throw new Error('Email already in use');
         }
       }),
     bodyValidation('username')
+      .trim()
       .exists({ checkFalsy: true })
       .withMessage('You need to specify username')
-      .matches(/^[a-zA-Z]+$/i)
+      .isLength({ min: 4 })
+      .withMessage('Username too short')
+      .matches(/^[a-zA-Z0-9]+$/i)
       .withMessage('Invalid format of username')
+      .trim()
       .custom(async username => {
-        const user = await UserController.getUser({ username });
+        const user = await UserController.getUser({
+          conditions: { username },
+          select: '_id',
+          options: {
+            lean: true
+          }
+        });
 
         if(user) {
           throw new Error('Username already in use');
         }
       }),
     bodyValidation('password')
+      .trim()
       .exists({ checkFalsy: true })
       .withMessage('You need to specify password')
       .isLength({ min: 6 })
       .withMessage('Password too short'),
     bodyValidation('fullname')
+      .trim()
       .exists({ checkFalsy: true })
       .withMessage('You need to specify fullname')
   ],
   ValidationErrorHandler,
   async(req, res, next) => {
+    const { email, username, password, fullname } = req.body;
+
     try {
-      const user = await UserController.registerUser(req.body);
-      const data = user.generateJWT();
+      const data = await UserController.registerUser({
+        toCreate: {
+          email,
+          username,
+          password,
+          fullname
+        },
+        select: '-_id fullname username email avatar bio permissions'
+      });
 
       return res
         .status(201)
         .json({
-          data: {
-            ...data,
-            user: {
-              fullname: user.fullname,
-              username: user.username,
-              email: user.email,
-              avatar: user.avatar,
-              permissions: user.permissions,
-              _id: user._id
-            }
-          }
+          data
         });
     } catch(err) {
       return next(err);

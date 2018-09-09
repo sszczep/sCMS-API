@@ -29,10 +29,16 @@ const Post = new mongoose.Schema({
     type: String,
     required: true
   },
-  friendlyUrl: {
+  url: {
     type: String,
     required: true,
     unique: true
+  }
+});
+
+Post.set('toObject', {
+  transform(doc, ret) {
+    delete ret.__v; // eslint-disable-line
   }
 });
 

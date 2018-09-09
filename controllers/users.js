@@ -1,33 +1,41 @@
 'use strict';
 
-const { Types: { ObjectId: { isValid: isValidID }}} = require('mongoose');
 const UserModel = require('../models/users.js');
 const AuthController = require('./auth.js');
+const filterObject = require('../utils/filterObject.js');
+
+const findContaining = async data =>
+  await UserModel
+    .find({ username: { $regex: data.phrase, $options: 'i' }})
+    .select(data.select || '')
+    .setOptions(data.options || {})
+    .populate(data.populate || [])
+    .exec();
 
 const getUser = async data =>
   await UserModel
-    .findOne(data)
-    .select(`-__v`)
-    .lean()
-    .exec();
-
-const getUserByPhrase = async phrase =>
-  await UserModel
-    .findOne({ $or: [
-      { username: phrase },
-      { _id: isValidID(phrase) ? phrase : undefined }
-    ]})
-    .select(`-__v`)
-    .lean()
+    .findOne(data.conditions)
+    .select(data.select || '')
+    .setOptions(data.options || {})
+    .populate(data.populate || [])
     .exec();
 
 const registerUser = async data => {
-  const response = await UserModel
-    .create(data);
+  const user = await UserModel
+    .create(data.toCreate);
 
-  response.__v = undefined; // eslint-disable-line no-underscore-dangle
+  return {
+    ...user.generateJWT(),
+    user: filterObject(user, data.select)
+  };
+};
 
-  return response;
+const addPost = async(userID, postID) => {
+  await UserModel
+    .findByIdAndUpdate(userID, {
+      $push: { posts: postID }
+    })
+    .exec();
 };
 
 const hasPermissions = (userPermissions, permissions) => {
@@ -45,15 +53,12 @@ const hasPermissions = (userPermissions, permissions) => {
 };
 
 const canAccessSensitiveInfo = async(req, user) => {
-  // get header with Token
-  const header = req.get('Authorization');
-
   try {
-    const token = await AuthController.checkAuthorizationHeaderAndReturnToken(header);
+    const token = await AuthController.checkAuthorizationHeaderAndReturnToken(req);
     const decoded = await AuthController.decodeToken(token);
 
     // if token belongs to user making request or user has permission to access others sensitive details
-    if(decoded._id.toString() === user._id.toString() || hasPermissions(decoded.permissions, [ 'detailedInfoAboutOtherUsers' ])) {
+    if(decoded.username.toString() === user.username.toString() || hasPermissions(decoded.permissions, [ 'detailedInfoAboutOtherUsers' ])) {
       return true;
     }
   } catch(err) {
@@ -62,9 +67,10 @@ const canAccessSensitiveInfo = async(req, user) => {
 };
 
 module.exports = {
+  findContaining,
   getUser,
-  getUserByPhrase,
   registerUser,
+  addPost,
   hasPermissions,
   canAccessSensitiveInfo
 };

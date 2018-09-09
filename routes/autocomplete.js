@@ -5,25 +5,34 @@ const router = express.Router();
 const { param: paramValidation } = require('express-validator/check');
 const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js');
 const PostController = require('../controllers/posts.js');
+const UserController = require('../controllers/users.js');
 
 /**
- * @api {get} /autocomplete/:phrase Get list of all users/posts containing given phrase
+ * @api {get} /autocomplete/:phrase Get list of users/posts containing given phrase (search is limited to 5 posts and 5 users)
  * @apiName GetContainingPhrase
  * @apiGroup Autocomplete
  *
  * @apiParam (Route Parameter) {String{3..}} phrase Phrase to look for
  *
- * @apiSuccess (Success 200) {Object[]} data Array of entries
- * @apiSuccess (Success 200) {String} data.name Name of entry
- * @apiSuccess (Success 200) {String} data.subtext Subtext of entry
- * @apiSuccess (Success 200) {String} data.avatar Avatar of entry (avatar of user or thumbnail of post)
- * @apiSuccess (Success 200) {String} data.url Url of entry
+ * @apiSuccess (Success 200) {Object} data
+ * @apiSuccess (Success 200) {Array} data.posts Array of posts
+ * @apiSuccess (Success 200) {String} data.posts.title Title
+ * @apiSuccess (Success 200) {String} data.posts.description Description
+ * @apiSuccess (Success 200) {String} data.posts.author Author
+ * @apiSuccess (Success 200) {String} data.posts.author.fullname Fullname
+ * @apiSuccess (Success 200) {String} data.posts.thumbnail Thumbnail
+ * @apiSuccess (Success 200) {String} data.posts.url Url
+ * @apiSuccess (Success 200) {Array} data.users Array of users
+ * @apiSuccess (Success 200) {String} data.users.fullname Name
+ * @apiSuccess (Success 200) {String} data.users.username Username
+ * @apiSuccess (Success 200) {String} data.users.avatar Avatar
  *
  * @apiUse ErrorObject
  */
 
 router.get('/:phrase?',
   paramValidation('phrase')
+    .trim()
     .isLength({ min: 3 })
     .withMessage('Phrase must be longer than 3 characters'),
   ValidationErrorHandler,
@@ -31,22 +40,35 @@ router.get('/:phrase?',
     try {
       const phrase = req.params.phrase;
 
-      const data = await PostController.findContaining(phrase);
-      const results = [];
+      const posts = await PostController.findContaining({
+        phrase,
+        select: '-_id title description thumbnail url',
+        options: {
+          limit: 5,
+          lean: true
+        },
+        populate: {
+          path: 'author',
+          select: '-_id fullname'
+        }
+      });
 
-      for(const item of data) {
-        results.push({
-          name: item.title,
-          subtext: item.description,
-          avatar: item.thumbnail,
-          url: item.friendlyUrl
-        });
-      }
+      const users = await UserController.findContaining({
+        phrase,
+        select: '-_id fullname username avatar',
+        options: {
+          limit: 5,
+          lean: true
+        }
+      });
 
       return res
         .status(200)
         .json({
-          data: results
+          data: {
+            posts,
+            users
+          }
         });
     } catch(err) {
       return next(err);

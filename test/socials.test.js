@@ -7,21 +7,7 @@ const request = require('supertest');
 // created socials using POST /socials request, will be filled later
 let createdSocials = [];
 
-// socials which will be created
-const socialsToCreate = [
-  {
-    name: 'Facebook',
-    url: 'https://www.facebook.com',
-    icon: 'fab fa-facebook'
-  },
-  {
-    name: 'Github',
-    url: 'https://www.github.com',
-    icon: 'fab fa-github'
-  }
-];
-
-module.exports = users => {
+module.exports = (socialsToCreate, users) => {
   describe('Testing /socials', () => {
     describe('#GET /socials', () => {
       it('Should return empty array of social links', async() => {
@@ -34,35 +20,54 @@ module.exports = users => {
     });
 
     describe('#POST /socials', () => {
-      it('Shouldn\'t create new social link - no Authorization Header', async() => {
+      it('Should not create new social link - empty payload', async() => {
         const { body } = await request(app)
           .post('/socials')
-          .send(socialsToCreate[0]);
+          .set('Authorization', `Bearer ${users.admin.token}`)
+          .send();
 
         expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t create new social link - wrong/outdater token', async() => {
+      it('Should not create new social link - some required fields are empty', async() => {
         const { body } = await request(app)
           .post('/socials')
-          .set('Authorization', 'Bearer blah_blah_blah')
-          .send(socialsToCreate[0]);
-
-        expect(body).to.have.property('errors');
-      });
-
-      it('Shouldn\'t create new social link - some required fields are empty', async() => {
-        const { body } = await request(app)
-          .post('/socials')
-          .set('Authorization', `Bearer ${users.user.token}`)
+          .set('Authorization', `Bearer ${users.admin.token}`)
           .send({
-            name: 'Invalid social link'
+            ...socialsToCreate[0],
+            name: undefined
           });
 
         expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t create new social link - user has no permission', async() => {
+      it('Should not create new social link - no Authorization Header', async() => {
+        const { body } = await request(app)
+          .post('/socials')
+          .send(socialsToCreate[0]);
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not create new social link - invalid token', async() => {
+        const { body } = await request(app)
+          .post('/socials')
+          .set('Authorization', 'Bearer blablabla')
+          .send(socialsToCreate[0]);
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not create new social link - outdated/wrong token', async() => {
+        const { body } = await request(app)
+          .post('/socials')
+          .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MzY1MTI4NjMsInVzZXJuYW1lIjoidXNlciIsInBlcm1pc3Npb25zIjpbXSwiaWF0IjoxNTM2NTEyMjYzfQ.jAWMZ8x-cXQfiOL689omiOq8JU1E8JteYYFyhVtjUdo')
+          .send(socialsToCreate[0]);
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not create new social link - user has no permission', async() => {
         const { body } = await request(app)
           .post('/socials')
           .set('Authorization', `Bearer ${users.user.token}`)
@@ -82,6 +87,10 @@ module.exports = users => {
           expect(body.data.url).to.equal(data.url);
           expect(body.data.icon).to.equal(data.icon);
 
+          // response should not contain _id and __v
+          expect(body.data).not.to.have.property('_id');
+          expect(body.data).not.to.have.property('__v');
+
           return body.data;
         };
 
@@ -90,10 +99,10 @@ module.exports = users => {
         createdSocials = await Promise.all(promises);
       });
 
-      it('Shouldn\'t create new social link - there is a link with given name', async() => {
+      it('Should not create new social link - there is a link with given name', async() => {
         const { body } = await request(app)
           .post('/socials')
-          .set('Authorization', `Bearer ${users.user.token}`)
+          .set('Authorization', `Bearer ${users.admin.token}`)
           .send(socialsToCreate[0]);
 
         expect(body).to.have.property('errors');
@@ -106,7 +115,15 @@ module.exports = users => {
           .get('/socials')
           .send();
 
-        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(createdSocials));
+        for(let i = 0; i < body.data.length; i++) {
+          expect(body.data[i].name).to.equal(createdSocials[i].name);
+          expect(body.data[i].url).to.equal(createdSocials[i].url);
+          expect(body.data[i].icon).to.equal(createdSocials[i].icon);
+
+          // response should not contain _id and __v
+          expect(body.data[i]).not.to.have.property('_id');
+          expect(body.data[i]).not.to.have.property('__v');
+        }
       });
     });
   });

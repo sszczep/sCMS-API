@@ -15,16 +15,20 @@ const CustomError = require('../utils/CustomError.js');
  * @apiGroup Options
  *
  * @apiSuccess (Success 200) {Object[]} data Array of options
- * @apiSuccess (Success 200) {String} data.key Name of option
- * @apiSuccess (Success 200) {String} data.value Value of option
- * @apiSuccess (Success 200) {String} data._id ID of option
+ * @apiSuccess (Success 200) {String} data.key Name
+ * @apiSuccess (Success 200) {String} data.value Value
  *
  * @apiUse ErrorObject
  */
 
 router.get('/', async(req, res, next) => {
   try {
-    const data = await OptionsController.getOptions();
+    const data = await OptionsController.getOptions({
+      select: '-_id key value',
+      options: {
+        lean: true
+      }
+    });
 
     return res
       .status(200)
@@ -35,46 +39,6 @@ router.get('/', async(req, res, next) => {
     return next(err);
   }
 });
-
-/**
- * @api {get} /options/:_id Get a single option
- * @apiName GetOption
- * @apiGroup Options
- *
- * @apiParam (Route Parameter) {String} _id ID of option
- *
- * @apiSuccess (Success 200) {Object} data Option object
- * @apiSuccess (Success 200) {String} data.key Name of option
- * @apiSuccess (Success 200) {String} data.value Value of option
- * @apiSuccess (Success 200) {String} data._id ID of option
- *
- * @apiUse ErrorObject
- */
-
-router.get('/:_id',
-  paramValidation('_id')
-    .exists({ checkFalsy: true })
-    .withMessage('You need to specify _id'),
-  ValidationErrorHandler,
-  async(req, res, next) => {
-    const _id = req.params._id;
-
-    try {
-      const data = await OptionsController.getOption({ _id });
-
-      if(!data) {
-        throw new CustomError('NoOptionFound', 'Couldn\'t find option with given name', 404);
-      }
-
-      return res
-        .status(200)
-        .json({
-          data
-        });
-    } catch(err) {
-      return next(err);
-    }
-  });
 
 // all requests below should require authentication
 
@@ -87,13 +51,12 @@ router.use(isLogged);
  *
  * @apiUse AuthorizationHeader
  *
- * @apiParam (JSON Payload) {String} key Name of option
- * @apiParam (JSON Payload) {String} value Value of option
+ * @apiParam (JSON Payload) {String} key Name
+ * @apiParam (JSON Payload) {String} value Value
  *
  * @apiSuccess (Success 201) {Object} data Newly created option
- * @apiSuccess (Success 201) {String} data.key Name of option
- * @apiSuccess (Success 201) {String} data.value Value of option
- * @apiSuccess (Success 201) {String} data._id ID of option
+ * @apiSuccess (Success 201) {String} data.key Name
+ * @apiSuccess (Success 201) {String} data.value Value
  *
  * @apiUse ErrorObject
  */
@@ -102,18 +65,26 @@ router.post('/',
   hasPermissions([ 'createOption' ]),
   [
     bodyValidation('key')
+      .trim()
       .exists({ checkFalsy: true })
       .withMessage('You need to specify key'),
     bodyValidation('value')
+      .trim()
       .exists({ checkFalsy: true })
       .withMessage('You need to specify value')
   ],
   ValidationErrorHandler,
   async(req, res, next) => {
-    const body = req.body;
+    const { key, value } = req.body;
 
     try {
-      const data = await OptionsController.createOption(body);
+      const data = await OptionsController.createOption({
+        toCreate: {
+          key,
+          value
+        },
+        select: '-_id key value'
+      });
 
       return res
         .status(201)
@@ -126,47 +97,52 @@ router.post('/',
   });
 
 /**
- * @api {put} /options/:_id Update single option
+ * @api {put} /options/:key Update single option
  * @apiName UpdateOption
  * @apiGroup Options
  *
  * @apiUse AuthorizationHeader
  *
- * @apiParam (Route Parameter) {String} _id ID of option
- * @apiParam (JSON Payload) {String} [newKey] New name of option
- * @apiParam (JSON Payload) {String} [newValue] New value of option
+ * @apiParam (Route Parameter) {String} key Name
+ * @apiParam (JSON Payload) {String} [newValue] New value
  *
  * @apiSuccess (Success 200) {Object} data Object of updated option
- * @apiSuccess (Success 200) {String} data.key New name of option
- * @apiSuccess (Success 200) {String} data.value New value of option
- * @apiSuccess (Success 200) {String} data._id ID of option
+ * @apiSuccess (Success 200) {String} data.key Name
+ * @apiSuccess (Success 200) {String} data.value New value
  *
  * @apiUse ErrorObject
  */
 
-router.put('/:_id',
+router.put('/:key',
   hasPermissions([ 'changeOption' ]),
-  paramValidation('_id')
-    .exists({ checkFalsy: true })
-    .withMessage('You need to specify _id'),
+  [
+    paramValidation('key')
+      .trim()
+      .exists({ checkFalsy: true })
+      .withMessage('You need to specify key'),
+    bodyValidation('newValue')
+      .trim()
+      .exists({ checkFalsy: true })
+      .withMessage('You need to specify newValue')
+  ],
   ValidationErrorHandler,
   async(req, res, next) => {
-    // first stringify object and then create it back to get rid of undefined properties
-    const obj = JSON.parse(JSON.stringify({
-      find: {
-        _id: req.params._id
-      },
-      update: {
-        key: req.body.newKey,
-        value: req.body.newValue
-      }
-    }));
+    const { key } = req.params;
+    const { newValue } = req.body;
 
     try {
-      const data = await OptionsController.updateOption(obj);
+      const data = await OptionsController.updateOption({
+        conditions: {
+          key
+        },
+        update: {
+          value: newValue
+        },
+        select: '-_id key value'
+      });
 
       if(!data) {
-        throw new CustomError('NoOptionFound', 'Couldn\'t find option with given id', 404);
+        throw new CustomError('NoOptionFound', 'Could not find option with given id', 404);
       }
 
       return res
@@ -180,33 +156,34 @@ router.put('/:_id',
   });
 
 /**
- * @api {delete} /options/:_id Delete single option
+ * @api {delete} /options/:key Delete single option
  * @apiName DeleteOption
  * @apiGroup Options
  *
  * @apiUse AuthorizationHeader
  *
- * @apiParam (Route Parameter) {String} id ID of option
+ * @apiParam (Route Parameter) {String} key Key
  *
  * @apiSuccess (Success 200) {null} null No response data
  *
  * @apiUse ErrorObject
  */
 
-router.delete('/:_id',
+router.delete('/:key',
   hasPermissions([ 'deleteOption' ]),
-  paramValidation('_id')
+  paramValidation('key')
+    .trim()
     .exists({ checkFalsy: true })
-    .withMessage('You need to specify _id'),
+    .withMessage('You need to specify key'),
   ValidationErrorHandler,
   async(req, res, next) => {
-    const _id = req.params._id;
+    const { key } = req.params;
 
     try {
-      const data = await OptionsController.deleteOption({ _id });
+      const data = await OptionsController.deleteOption({ key });
 
       if(!data) {
-        throw new CustomError('NoOptionFound', 'Couldn\'t find option with given id', 404);
+        throw new CustomError('NoOptionFound', 'Could not find option with given id', 404);
       }
 
       return res.sendStatus(200);

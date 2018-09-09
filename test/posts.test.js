@@ -7,46 +7,7 @@ const request = require('supertest');
 // created posts using POST /posts request, will be filled later
 let createdPosts = [];
 
-// posts which will be created
-const postsToCreate = [
-  {
-    title: 'Testing posts 1',
-    description: 'Short description 1',
-    content: 'Lorem ipsum...',
-    thumbnail: '/images/test.png',
-    created: Date.now()
-  },
-  {
-    title: 'Testing posts 2',
-    description: 'Short description 2',
-    content: 'Lorem ipsum...',
-    thumbnail: '/images/test.png',
-    created: Date.now() + 1
-  },
-  {
-    title: 'Testing posts 3',
-    description: 'Short description 3',
-    content: 'Lorem ipsum...',
-    thumbnail: '/images/test.png',
-    created: Date.now() + 2
-  },
-  {
-    title: 'Testing posts 4',
-    description: 'Short description 4',
-    content: 'Lorem ipsum...',
-    thumbnail: '/images/test.png',
-    created: Date.now() + 3
-  },
-  {
-    title: 'Testing posts 5',
-    description: 'Short description 5',
-    content: 'Lorem ipsum...',
-    thumbnail: '/images/test.png',
-    created: Date.now() + 4
-  }
-];
-
-module.exports = users => new Promise(resolve => {
+module.exports = (postsToCreate, users) => new Promise(resolve => {
   describe('Testing /posts', () => {
     describe('#GET /posts/count', () => {
       it('Should return number of posts equal to 0', async() => {
@@ -59,7 +20,7 @@ module.exports = users => new Promise(resolve => {
     });
 
     describe('#POST /posts', () => {
-      it('Shouldn\'t publish new post - some required fields are empty', async() => {
+      it('Should not publish new post - empty payload', async() => {
         const { body } = await request(app)
           .post('/posts')
           .set('Authorization', `Bearer ${users.admin.token}`)
@@ -68,16 +29,45 @@ module.exports = users => new Promise(resolve => {
         expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t publish new post - outdated/wrong token', async() => {
+      it('Should not publish new post - some required fields are empty', async() => {
         const { body } = await request(app)
           .post('/posts')
-          .set('Authorization', 'Bearer blah_blah_blah')
+          .set('Authorization', `Bearer ${users.admin.token}`)
+          .send({
+            ...postsToCreate[0],
+            title: undefined
+          });
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not publish new post - no Authorization Header', async() => {
+        const { body } = await request(app)
+          .post('/posts')
+          .send(postsToCreate[0]);
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not publish new post - invalid token', async() => {
+        const { body } = await request(app)
+          .post('/posts')
+          .set('Authorization', 'Bearer blablabla')
+          .send(postsToCreate[0]);
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not publish new post - outdated/wrong token', async() => {
+        const { body } = await request(app)
+          .post('/posts')
+          .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MzY1MTI4NjMsInVzZXJuYW1lIjoidXNlciIsInBlcm1pc3Npb25zIjpbXSwiaWF0IjoxNTM2NTEyMjYzfQ.jAWMZ8x-cXQfiOL689omiOq8JU1E8JteYYFyhVtjUdo')
           .send();
 
         expect(body).to.have.property('errors');
       });
 
-      it('Shouldn\'t publish new post - user has no permission', async() => {
+      it('Should not publish new post - user has no permission', async() => {
         const { body } = await request(app)
           .post('/posts')
           .set('Authorization', `Bearer ${users.user.token}`)
@@ -97,11 +87,19 @@ module.exports = users => new Promise(resolve => {
           expect(body.data.description).to.equal(data.description);
           expect(body.data.content).to.equal(data.content);
           expect(body.data.thumbnail).to.equal(data.thumbnail);
-          expect(new Date(body.data.created).getTime()).to.equal(data.created);
+          expect(new Date(body.data.created).getTime()).to.equal(new Date(data.created).getTime());
+
+          expect(body.data).to.have.property('url');
 
           // author testing
-          expect(body.data.author._id).to.equal(users.admin._id);
           expect(body.data.author.fullname).to.equal(users.admin.fullname);
+          expect(body.data.author.username).to.equal(users.admin.username);
+
+          // response should not contain _id and __v
+          expect(body.data).not.to.have.property('_id');
+          expect(body.data).not.to.have.property('__v');
+          expect(body.data.author).not.to.have.property('_id');
+          expect(body.data.author).not.to.have.property('__v');
 
           return body.data;
         };
@@ -113,7 +111,7 @@ module.exports = users => new Promise(resolve => {
         resolve(createdPosts);
       });
 
-      it('Shouldn\'t publish new post - there is a post with this title', async() => {
+      it('Should not publish new post - there is a post with this title', async() => {
         const { body } = await request(app)
           .post('/posts')
           .set('Authorization', `Bearer ${users.user.token}`)
@@ -133,8 +131,8 @@ module.exports = users => new Promise(resolve => {
       });
     });
 
-    describe('#GET /posts/:phrase', () => {
-      it('Shouldn\'t get post by url - there is no post with given url', async() => {
+    describe('#GET /posts/:url', () => {
+      it('Should not get post by url - there is no post with given url', async() => {
         const { body } = await request(app)
           .get('/posts/you-wont-find-me')
           .send();
@@ -144,26 +142,25 @@ module.exports = users => new Promise(resolve => {
 
       it('Should get post by url', async() => {
         const { body } = await request(app)
-          .get(`/posts/${createdPosts[0].friendlyUrl}`)
+          .get(`/posts/${createdPosts[0].url}`)
           .send();
 
-        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(createdPosts[0]));
-      });
+        expect(body.data.title).to.equal(createdPosts[0].title);
+        expect(body.data.description).to.equal(createdPosts[0].description);
+        expect(body.data.content).to.equal(createdPosts[0].content);
+        expect(body.data.thumbnail).to.equal(createdPosts[0].thumbnail);
+        expect(new Date(body.data.created).getTime()).to.equal(new Date(createdPosts[0].created).getTime());
+        expect(body.data.url).to.equal(createdPosts[0].url);
 
-      it('Shouldn\'t get post by _id - there is no post with given id', async() => {
-        const { body } = await request(app)
-          .get('/posts/5b8bd1658087c227e50a09d9')
-          .send();
+        // author testing
+        expect(body.data.author.fullname).to.equal(users.admin.fullname);
+        expect(body.data.author.username).to.equal(users.admin.username);
 
-        expect(body).to.have.property('errors');
-      });
-
-      it('Should get post by _id', async() => {
-        const { body } = await request(app)
-          .get(`/posts/${createdPosts[0]._id}`)
-          .send();
-
-        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(createdPosts[0]));
+        // response should not contain _id and __v
+        expect(body.data).not.to.have.property('_id');
+        expect(body.data).not.to.have.property('__v');
+        expect(body.data.author).not.to.have.property('_id');
+        expect(body.data.author).not.to.have.property('__v');
       });
     });
 
@@ -175,7 +172,24 @@ module.exports = users => new Promise(resolve => {
 
         body.data.reverse();
 
-        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(createdPosts));
+        for(let i = 0; i < body.data.length; i++) {
+          expect(body.data[i].title).to.equal(createdPosts[i].title);
+          expect(body.data[i].description).to.equal(createdPosts[i].description);
+          expect(body.data[i].content).to.equal(createdPosts[i].content);
+          expect(body.data[i].thumbnail).to.equal(createdPosts[i].thumbnail);
+          expect(new Date(body.data[i].created).getTime()).to.equal(new Date(createdPosts[i].created).getTime());
+          expect(body.data[i].url).to.equal(createdPosts[i].url);
+
+          // author testing
+          expect(body.data[i].author.fullname).to.equal(users.admin.fullname);
+          expect(body.data[i].author.username).to.equal(users.admin.username);
+
+          // response should not contain _id and __v
+          expect(body.data[i]).not.to.have.property('_id');
+          expect(body.data[i]).not.to.have.property('__v');
+          expect(body.data[i].author).not.to.have.property('_id');
+          expect(body.data[i].author).not.to.have.property('__v');
+        }
       });
 
       it('Should get list of posts without their contents - preview = true', async() => {
@@ -185,15 +199,25 @@ module.exports = users => new Promise(resolve => {
 
         body.data.reverse();
 
-        const postsWithoutContent = createdPosts.map(post => {
-          const newPost = { ...post };
+        for(let i = 0; i < body.data.length; i++) {
+          expect(body.data[i]).not.to.have.property('content');
 
-          newPost.content = undefined;
+          expect(body.data[i].title).to.equal(createdPosts[i].title);
+          expect(body.data[i].description).to.equal(createdPosts[i].description);
+          expect(body.data[i].thumbnail).to.equal(createdPosts[i].thumbnail);
+          expect(new Date(body.data[i].created).getTime()).to.equal(new Date(createdPosts[i].created).getTime());
+          expect(body.data[i].url).to.equal(createdPosts[i].url);
 
-          return newPost;
-        });
+          // author testing
+          expect(body.data[i].author.fullname).to.equal(users.admin.fullname);
+          expect(body.data[i].author.username).to.equal(users.admin.username);
 
-        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(postsWithoutContent));
+          // response should not contain _id and __v
+          expect(body.data[i]).not.to.have.property('_id');
+          expect(body.data[i]).not.to.have.property('__v');
+          expect(body.data[i].author).not.to.have.property('_id');
+          expect(body.data[i].author).not.to.have.property('__v');
+        }
       });
 
       // should return posts with titles [Testing posts 5, Testing posts 4, Testing posts 3]
@@ -207,7 +231,24 @@ module.exports = users => new Promise(resolve => {
 
         const toCompare = createdPosts.slice(2);
 
-        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(toCompare));
+        for(let i = 0; i < body.data.length; i++) {
+          expect(body.data[i].title).to.equal(toCompare[i].title);
+          expect(body.data[i].description).to.equal(toCompare[i].description);
+          expect(body.data[i].content).to.equal(toCompare[i].content);
+          expect(body.data[i].thumbnail).to.equal(toCompare[i].thumbnail);
+          expect(new Date(body.data[i].created).getTime()).to.equal(new Date(toCompare[i].created).getTime());
+          expect(body.data[i].url).to.equal(toCompare[i].url);
+
+          // author testing
+          expect(body.data[i].author.fullname).to.equal(users.admin.fullname);
+          expect(body.data[i].author.username).to.equal(users.admin.username);
+
+          // response should not contain _id and __v
+          expect(body.data[i]).not.to.have.property('_id');
+          expect(body.data[i]).not.to.have.property('__v');
+          expect(body.data[i].author).not.to.have.property('_id');
+          expect(body.data[i].author).not.to.have.property('__v');
+        }
       });
 
       // should return posts with titles [Testing posts 1, Testing posts 2]
@@ -221,7 +262,24 @@ module.exports = users => new Promise(resolve => {
 
         const toCompare = createdPosts.slice(0, 2);
 
-        expect(JSON.stringify(body.data)).to.equal(JSON.stringify(toCompare));
+        for(let i = 0; i < body.data.length; i++) {
+          expect(body.data[i].title).to.equal(toCompare[i].title);
+          expect(body.data[i].description).to.equal(toCompare[i].description);
+          expect(body.data[i].content).to.equal(toCompare[i].content);
+          expect(body.data[i].thumbnail).to.equal(toCompare[i].thumbnail);
+          expect(new Date(body.data[i].created).getTime()).to.equal(new Date(toCompare[i].created).getTime());
+          expect(body.data[i].url).to.equal(toCompare[i].url);
+
+          // author testing
+          expect(body.data[i].author.fullname).to.equal(users.admin.fullname);
+          expect(body.data[i].author.username).to.equal(users.admin.username);
+
+          // response should not contain _id and __v
+          expect(body.data[i]).not.to.have.property('_id');
+          expect(body.data[i]).not.to.have.property('__v');
+          expect(body.data[i].author).not.to.have.property('_id');
+          expect(body.data[i].author).not.to.have.property('__v');
+        }
       });
     });
   });

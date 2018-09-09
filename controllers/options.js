@@ -1,35 +1,29 @@
 'use strict';
 
 const OptionModel = require('../models/options.js');
+const filterObject = require('../utils/filterObject.js');
 
-const getOption = async data =>
-  await OptionModel
-    .findOne(data)
-    .select('-__v')
-    .lean()
-    .exec();
-
-const getOptions = async() =>
+const getOptions = async data =>
   await OptionModel
     .find()
-    .select('-__v')
-    .lean()
+    .select(data.select || '')
+    .setOptions(data.options || {})
     .exec();
 
 const createOption = async data => {
   const response = await OptionModel
-    .create(data);
+    .create(data.toCreate);
 
-  response.__v = undefined; // eslint-disable-line no-underscore-dangle
-
-  return response;
+  return filterObject(response, data.select);
 };
 
-const updateOption = async data =>
-  await OptionModel
-    .findOneAndUpdate(data.find, data.update, { new: true, runValidators: true })
-    .select('-__v')
+const updateOption = async data => {
+  const response = await OptionModel
+    .findOneAndUpdate(data.conditions, data.update, { new: true, runValidators: true })
     .exec();
+
+  return filterObject(response, data.select);
+};
 
 const deleteOption = async data =>
   await OptionModel
@@ -37,7 +31,6 @@ const deleteOption = async data =>
     .exec();
 
 module.exports = {
-  getOption,
   getOptions,
   createOption,
   updateOption,

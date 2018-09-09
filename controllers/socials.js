@@ -1,21 +1,20 @@
 'use strict';
 
-const SocialLinksModel = require('../models/socialLinks.js');
+const SocialLinkModel = require('../models/socialLinks.js');
+const filterObject = require('../utils/filterObject.js');
 
-const getSocialLinks = async() =>
-  await SocialLinksModel
+const getSocialLinks = async data =>
+  await SocialLinkModel
     .find()
-    .select(`-__v`)
-    .lean()
+    .select(data.select || '')
+    .setOptions(data.options || {})
     .exec();
 
 const createSocialLink = async data => {
-  const response = await SocialLinksModel
-    .create(data);
+  const response = await SocialLinkModel
+    .create(data.toCreate);
 
-  response.__v = undefined; // eslint-disable-line no-underscore-dangle
-
-  return response;
+  return filterObject(response, data.select);
 };
 
 module.exports = {
