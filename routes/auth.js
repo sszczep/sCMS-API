@@ -99,6 +99,18 @@ router.post('/login',
  * @apiUse ErrorObject
  */
 
+const isUserWithGivenEmailOrUsername = async condition => {
+  const user = await UserController.getUser({
+    conditions: condition,
+    select: '_id',
+    options: {
+      lean: true
+    }
+  });
+
+  return Boolean(user);
+};
+
 router.post('/register',
   [
     bodyValidation('email')
@@ -107,15 +119,7 @@ router.post('/register',
       .withMessage('Invalid format of email')
       .normalizeEmail()
       .custom(async email => {
-        const user = await UserController.getUser({
-          conditions: { email },
-          select: '_id',
-          options: {
-            lean: true
-          }
-        });
-
-        if(user) {
+        if(await isUserWithGivenEmailOrUsername({ email })) {
           throw new Error('Email already in use');
         }
       }),
@@ -125,19 +129,11 @@ router.post('/register',
       .withMessage('You need to specify username')
       .isLength({ min: 4 })
       .withMessage('Username too short')
-      .matches(/^[a-zA-Z0-9]+$/i)
+      .matches(/^[a-zA-Z0-9]+$/)
       .withMessage('Invalid format of username')
       .trim()
       .custom(async username => {
-        const user = await UserController.getUser({
-          conditions: { username },
-          select: '_id',
-          options: {
-            lean: true
-          }
-        });
-
-        if(user) {
+        if(await isUserWithGivenEmailOrUsername({ username })) {
           throw new Error('Username already in use');
         }
       }),
