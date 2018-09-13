@@ -6,7 +6,7 @@ const request = require('supertest');
 
 module.exports = users => {
   describe('Testing /users', () => {
-    describe('#GET /users/:phrase', () => {
+    describe('#GET /users/:username', () => {
       it('Should not get user data - no user with given username', async() => {
         const { body } = await request(app)
           .get('/users/lulz')
@@ -23,7 +23,6 @@ module.exports = users => {
         expect(body.data.username).to.equal(users.user.username);
         expect(body.data.fullname).to.equal(users.user.fullname);
         expect(body.data.avatar).to.equal(users.user.avatar);
-        expect(body.data.bio).to.equal(users.user.bio);
 
         // we cannot compare posts - they are not populated in auth responses but here they are
         expect(body.data).to.have.property('posts');
@@ -46,7 +45,6 @@ module.exports = users => {
         expect(body.data.username).to.equal(users.user.username);
         expect(body.data.fullname).to.equal(users.user.fullname);
         expect(body.data.avatar).to.equal(users.user.avatar);
-        expect(body.data.bio).to.equal(users.user.bio);
 
         // we cannot compare posts - they are not populated in auth responses but here they are
         expect(body.data).to.have.property('posts');
@@ -69,7 +67,6 @@ module.exports = users => {
         expect(body.data.username).to.equal(users.user.username);
         expect(body.data.fullname).to.equal(users.user.fullname);
         expect(body.data.avatar).to.equal(users.user.avatar);
-        expect(body.data.bio).to.equal(users.user.bio);
 
         // we cannot compare posts - they are not populated in auth responses but here they are
         expect(body.data).to.have.property('posts');
@@ -92,7 +89,6 @@ module.exports = users => {
         expect(body.data.username).to.equal(users.user.username);
         expect(body.data.fullname).to.equal(users.user.fullname);
         expect(body.data.avatar).to.equal(users.user.avatar);
-        expect(body.data.bio).to.equal(users.user.bio);
 
         // we cannot compare posts - they are not populated in auth responses but here they are
         expect(body.data).to.have.property('posts');
@@ -115,7 +111,6 @@ module.exports = users => {
         expect(body.data.username).to.equal(users.user.username);
         expect(body.data.fullname).to.equal(users.user.fullname);
         expect(body.data.avatar).to.equal(users.user.avatar);
-        expect(body.data.bio).to.equal(users.user.bio);
 
         // we cannot compare posts - they are not populated in auth responses but here they are
         expect(body.data).to.have.property('posts');
@@ -138,7 +133,6 @@ module.exports = users => {
         expect(body.data.username).to.equal(users.admin.username);
         expect(body.data.fullname).to.equal(users.admin.fullname);
         expect(body.data.avatar).to.equal(users.admin.avatar);
-        expect(body.data.bio).to.equal(users.admin.bio);
 
         // we cannot compare posts - they are not populated in auth responses but here they are
         expect(body.data).to.have.property('posts');

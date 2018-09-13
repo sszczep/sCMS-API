@@ -110,18 +110,6 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
         // token should be a valid token
         expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
         expect(body.data).to.have.property('expiration');
-
-        // user should not have permissions
-        expect(body.data.user.permissions.length).to.equal(0);
-
-        // all other datas should match
-        expect(body.data.user.username).to.equal(user.username);
-        expect(body.data.user.email).to.equal(user.email);
-        expect(body.data.user.fullname).to.equal(user.fullname);
-
-        // response should not contain _id and __v
-        expect(body.data.user).not.to.have.property('_id');
-        expect(body.data.user).not.to.have.property('__v');
       });
     });
 
@@ -177,14 +165,6 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
         // token should be a valid token
         expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
         expect(body.data).to.have.property('expiration');
-
-        expect(body.data.user.username).to.equal(user.username);
-        expect(body.data.user.email).to.equal(user.email);
-        expect(body.data.user.fullname).to.equal(user.fullname);
-
-        // response should not contain _id and __v
-        expect(body.data.user).not.to.have.property('_id');
-        expect(body.data.user).not.to.have.property('__v');
       });
 
       it('Should login with username', async() => {
@@ -198,14 +178,6 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
         // token should be a valid token
         expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
         expect(body.data).to.have.property('expiration');
-
-        expect(body.data.user.username).to.equal(user.username);
-        expect(body.data.user.email).to.equal(user.email);
-        expect(body.data.user.fullname).to.equal(user.fullname);
-
-        // response should not contain _id and __v
-        expect(body.data.user).not.to.have.property('_id');
-        expect(body.data.user).not.to.have.property('__v');
       });
 
       it('Should login with username with some letters capitalized', async() => {
@@ -219,14 +191,6 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
         // token should be a valid token
         expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
         expect(body.data).to.have.property('expiration');
-
-        expect(body.data.user.username).to.equal(user.username);
-        expect(body.data.user.email).to.equal(user.email);
-        expect(body.data.user.fullname).to.equal(user.fullname);
-
-        // response should not contain _id and __v
-        expect(body.data.user).not.to.have.property('_id');
-        expect(body.data.user).not.to.have.property('__v');
       });
 
       it('Should login with email with some letters capitalized', async() => {
@@ -240,14 +204,6 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
         // token should be a valid token
         expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
         expect(body.data).to.have.property('expiration');
-
-        expect(body.data.user.username).to.equal(user.username);
-        expect(body.data.user.email).to.equal(user.email);
-        expect(body.data.user.fullname).to.equal(user.fullname);
-
-        // response should not contain _id and __v
-        expect(body.data.user).not.to.have.property('_id');
-        expect(body.data.user).not.to.have.property('__v');
       });
 
       it('Should login both user and admin successfully and return tokens', async() => {
@@ -263,23 +219,15 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
           expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
           expect(body.data).to.have.property('expiration');
 
-          expect(body.data.user.username).to.equal(data.username);
-          expect(body.data.user.email).to.equal(data.email);
-          expect(body.data.user.fullname).to.equal(data.fullname);
-
-          // response should not contain _id and __v
-          expect(body.data.user).not.to.have.property('_id');
-          expect(body.data.user).not.to.have.property('__v');
-
-          return { token: body.data.token, ...body.data.user };
+          return body.data.token;
         };
 
-        const loggedUser = await login(user);
-        const loggedAdmin = await login(admin);
+        const userToken = await login(user);
+        const adminToken = await login(admin);
 
         return resolve({
-          user: loggedUser,
-          admin: loggedAdmin
+          userToken,
+          adminToken
         });
       });
     });

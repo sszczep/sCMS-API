@@ -27,13 +27,6 @@ const UserController = require('../controllers/users.js');
  * @apiSuccess (Success 200) {Object} data
  * @apiSuccess (Success 200) {String} data.token JWT token
  * @apiSuccess (Success 200) {String} data.expiration JWT token expiration date
- * @apiSuccess (Success 200) {Object} data.user User's details
- * @apiSuccess (Success 200) {String} data.user.fullname Name
- * @apiSuccess (Success 200) {String} data.user.username Username
- * @apiSuccess (Success 200) {String} data.user.email Email
- * @apiSuccess (Success 200) {String} data.user.avatar Avatar
- * @apiSuccess (Success 200) {String} data.user.bio Bio
- * @apiSuccess (Success 200) {Array} data.user.permissions Permissions
  *
  * @apiUse ErrorObject
  */
@@ -53,7 +46,7 @@ router.post('/login',
     const { login, password } = req.body;
 
     try {
-      const { token, expiration, user } = await AuthController.validateCredentialsAndReturnData({
+      const { token, expiration } = await AuthController.validateCredentialsAndReturnData({
         credentials: {
           login,
           password
@@ -66,8 +59,7 @@ router.post('/login',
         .json({
           data: {
             token,
-            expiration,
-            user
+            expiration
           }
         });
     } catch(err) {
@@ -88,13 +80,6 @@ router.post('/login',
  * @apiSuccess (Success 201) {Object} data
  * @apiSuccess (Success 201) {String} data.token JWT token
  * @apiSuccess (Success 201) {String} data.expiration JWT token expiration date
- * @apiSuccess (Success 201) {Object} data.user User's details
- * @apiSuccess (Success 201) {String} data.user.fullname Name
- * @apiSuccess (Success 201) {String} data.user.username Username
- * @apiSuccess (Success 201) {String} data.user.email Email
- * @apiSuccess (Success 201) {String} data.user.avatar Avatar
- * @apiSuccess (Success 201) {String} data.user.bio Bio
- * @apiSuccess (Success 201) {Array} data.user.permissions Permissions
  *
  * @apiUse ErrorObject
  */
@@ -159,8 +144,7 @@ router.post('/register',
           username,
           password,
           fullname
-        },
-        select: '-_id fullname username email avatar bio permissions'
+        }
       });
 
       return res

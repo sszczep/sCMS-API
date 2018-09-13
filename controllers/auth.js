@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const config = require('../config.js');
 const UserModel = require('../models/users.js');
 const CustomError = require('../utils/CustomError.js');
-const filterObject = require('../utils/filterObject.js');
 
 const validateCredentialsAndReturnData = async data => {
   try {
@@ -17,10 +16,7 @@ const validateCredentialsAndReturnData = async data => {
       throw new CustomError('BadCredentials', 'Could not login - invalid credentials', 403);
     }
 
-    return {
-      ...user.generateJWT(),
-      user: filterObject(user, data.select)
-    };
+    return user.generateJWT();
   } catch(err) {
     throw err;
   }

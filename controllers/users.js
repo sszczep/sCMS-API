@@ -2,7 +2,6 @@
 
 const UserModel = require('../models/users.js');
 const AuthController = require('./auth.js');
-const filterObject = require('../utils/filterObject.js');
 
 const findContaining = async data =>
   await UserModel
@@ -24,10 +23,7 @@ const registerUser = async data => {
   const user = await UserModel
     .create(data.toCreate);
 
-  return {
-    ...user.generateJWT(),
-    user: filterObject(user, data.select)
-  };
+  return user.generateJWT();
 };
 
 const addPost = async(userID, postID) => {
