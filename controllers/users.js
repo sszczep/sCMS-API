@@ -23,7 +23,7 @@ const registerUser = async data => {
   const user = await UserModel
     .create(data.toCreate);
 
-  return user.generateJWT();
+  return await user.generateJWTTokens();
 };
 
 const addPost = async(userID, postID) => {

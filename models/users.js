@@ -40,7 +40,8 @@ const User = new mongoose.Schema({
   permissions: {
     type: Array,
     default: []
-  }
+  },
+  refreshToken: String
 });
 
 User.set('toObject', {
@@ -65,18 +66,43 @@ User.methods.validatePassword = async function(password) {
   return await bcrypt.compare(password, this.password);
 };
 
-User.methods.generateJWT = function() {
+User.methods.refreshJWTToken = function() {
   // expiration date set to 10 minutes
-  const exp = Math.floor(Date.now() / 1000) + (10 * 60);
+  const tokenExp = Math.floor(Date.now() / 1000) + (10 * 60);
 
   const token = jwt.sign({
-    exp,
+    exp: tokenExp,
     _id: this._id,
     username: this.username,
     permissions: this.permissions
   }, config.jwtSecret);
 
-  return { token, expiration: exp * 1000 };
+  return { token, expiration: tokenExp * 1000 };
+};
+
+User.methods.generateJWTTokens = async function() {
+  // expiration date set to 10 minutes
+  const tokenExp = Math.floor(Date.now() / 1000) + (10 * 60);
+
+  const token = jwt.sign({
+    exp: tokenExp,
+    _id: this._id,
+    username: this.username,
+    permissions: this.permissions
+  }, config.jwtSecret);
+
+  const refreshToken = jwt.sign({
+    _id: this._id
+  }, config.jwtRefreshSecret, {
+    expiresIn: '0.5y'
+  });
+
+  this.refreshToken = refreshToken;
+
+  // store refresh token in database
+  await this.save();
+
+  return { token, expiration: tokenExp * 1000, refreshToken };
 };
 
 module.exports = mongoose.model('User', User);

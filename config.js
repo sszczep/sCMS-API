@@ -10,5 +10,6 @@ module.exports = {
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD
   },
-  jwtSecret: process.env.JWT_SECRET || 'secret'
+  jwtSecret: process.env.JWT_SECRET || 'secret',
+  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || 'some_secret_shit'
 };

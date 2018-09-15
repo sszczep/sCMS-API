@@ -5,7 +5,21 @@ const config = require('../config.js');
 const UserModel = require('../models/users.js');
 const CustomError = require('../utils/CustomError.js');
 
-const validateCredentialsAndReturnData = async data => {
+const refreshToken = async token => {
+  try {
+    const user = await UserModel.findOne({ refreshToken: token }).exec();
+
+    if(!user) {
+      throw new CustomError('InvalidRefreshToken', 'Given refresh token is not valid', 406);
+    }
+
+    return await user.refreshJWTToken();
+  } catch(err) {
+    throw err;
+  }
+};
+
+const validateCredentialsAndReturnTokens = async data => {
   try {
     const user = await UserModel.findOne({ $or: [
       { email: { $regex: new RegExp(`^${data.credentials.login}$`), $options: 'i' }},
@@ -16,7 +30,7 @@ const validateCredentialsAndReturnData = async data => {
       throw new CustomError('BadCredentials', 'Could not login - invalid credentials', 403);
     }
 
-    return user.generateJWT();
+    return await user.generateJWTTokens();
   } catch(err) {
     throw err;
   }
@@ -49,7 +63,8 @@ const decodeToken = async token => {
 };
 
 module.exports = {
-  validateCredentialsAndReturnData,
+  refreshToken,
+  validateCredentialsAndReturnTokens,
   checkAuthorizationHeaderAndReturnToken,
   decodeToken
 };

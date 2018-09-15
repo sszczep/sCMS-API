@@ -27,6 +27,7 @@ const UserController = require('../controllers/users.js');
  * @apiSuccess (Success 200) {Object} data
  * @apiSuccess (Success 200) {String} data.token JWT token
  * @apiSuccess (Success 200) {String} data.expiration JWT token expiration date
+ * @apiSuccess (Success 200) {String} data.refreshToken JWT refresh token
  *
  * @apiUse ErrorObject
  */
@@ -46,7 +47,7 @@ router.post('/login',
     const { login, password } = req.body;
 
     try {
-      const { token, expiration } = await AuthController.validateCredentialsAndReturnData({
+      const data = await AuthController.validateCredentialsAndReturnTokens({
         credentials: {
           login,
           password
@@ -57,10 +58,7 @@ router.post('/login',
       return res
         .status(200)
         .json({
-          data: {
-            token,
-            expiration
-          }
+          data
         });
     } catch(err) {
       return next(err);
@@ -80,6 +78,7 @@ router.post('/login',
  * @apiSuccess (Success 201) {Object} data
  * @apiSuccess (Success 201) {String} data.token JWT token
  * @apiSuccess (Success 201) {String} data.expiration JWT token expiration date
+ * @apiSuccess (Success 201) {String} data.refreshToken JWT refresh token
  *
  * @apiUse ErrorObject
  */
@@ -149,6 +148,46 @@ router.post('/register',
 
       return res
         .status(201)
+        .json({
+          data
+        });
+    } catch(err) {
+      return next(err);
+    }
+  });
+
+/**
+   * @api {post} /auth/refresh-token Refresh token
+   * @apiName Refresh Token
+   * @apiGroup Auth
+   *
+   * @apiParam (JSON Payload) {String} refreshToken Refresh token
+   *
+   * @apiSuccess (Success 200) {Object} data
+   * @apiSuccess (Success 200) {String} data.token New JWT token
+   * @apiSuccess (Success 200) {String} data.expiration New JWT token expiration date
+   *
+   * @apiUse ErrorObject
+   */
+
+router.post('/refresh-token',
+  [
+    bodyValidation('refreshToken')
+      .trim()
+      .exists({ checkFalsy: true })
+      .withMessage('You need to specify refreshToken')
+      .isJWT()
+      .withMessage('Specified refreshToken is not valid')
+  ],
+  ValidationErrorHandler,
+  async(req, res, next) => {
+    const { refreshToken } = req.body;
+
+    try {
+      const data = await AuthController.refreshToken(refreshToken);
+
+      return res
+        .status(200)
         .json({
           data
         });

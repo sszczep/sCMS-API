@@ -14,6 +14,9 @@ const pokemonize = string =>
     .map((char, index) => (index % 2 ? char : char.toUpperCase())) // eslint-disable-line no-confusing-arrow
     .join('');
 
+// will be filled later
+let tokens = {};
+
 module.exports = ({ user, admin }) => new Promise(resolve => {
   describe('Testing /auth', () => {
     describe('#POST /auth/register', () => {
@@ -109,6 +112,7 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
 
         // token should be a valid token
         expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
+        expect(body.data.refreshToken).to.be.a.jwt; // eslint-disable-line no-unused-expressions
         expect(body.data).to.have.property('expiration');
       });
     });
@@ -164,6 +168,7 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
 
         // token should be a valid token
         expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
+        expect(body.data.refreshToken).to.be.a.jwt; // eslint-disable-line no-unused-expressions
         expect(body.data).to.have.property('expiration');
       });
 
@@ -177,6 +182,7 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
 
         // token should be a valid token
         expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
+        expect(body.data.refreshToken).to.be.a.jwt; // eslint-disable-line no-unused-expressions
         expect(body.data).to.have.property('expiration');
       });
 
@@ -190,6 +196,7 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
 
         // token should be a valid token
         expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
+        expect(body.data.refreshToken).to.be.a.jwt; // eslint-disable-line no-unused-expressions
         expect(body.data).to.have.property('expiration');
       });
 
@@ -203,6 +210,7 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
 
         // token should be a valid token
         expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
+        expect(body.data.refreshToken).to.be.a.jwt; // eslint-disable-line no-unused-expressions
         expect(body.data).to.have.property('expiration');
       });
 
@@ -217,18 +225,75 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
 
           // token should be a valid token
           expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
+          expect(body.data.refreshToken).to.be.a.jwt; // eslint-disable-line no-unused-expressions
           expect(body.data).to.have.property('expiration');
 
-          return body.data.token;
+          return {
+            token: body.data.token,
+            refreshToken: body.data.refreshToken,
+            expiration: body.data.expiration
+          };
         };
 
-        const userToken = await login(user);
-        const adminToken = await login(admin);
+        const userTokens = await login(user);
+        const adminTokens = await login(admin);
+
+        tokens = { userTokens, adminTokens };
 
         return resolve({
-          userToken,
-          adminToken
+          userToken: userTokens.token,
+          adminToken: adminTokens.token
         });
+      });
+    });
+
+    describe('#POST /auth/refresh-token', () => {
+      it('Should not refresh token - empty payload', async() => {
+        const { body } = await request(app)
+          .post('/auth/refresh-token')
+          .send();
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not refresh token - invalid refresh token', async() => {
+        const { body } = await request(app)
+          .post('/auth/refresh-token')
+          .send({
+            refreshToken: 'blablabla'
+          });
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not refresh token - outdated/wrong refresh token', async() => {
+        const { body } = await request(app)
+          .post('/auth/refresh-token')
+          .send({
+            refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MzcwMDI2MTQsImV4cCI6MTU1Mjc4MTQxNH0.euubuVcQKOiNdTlCqPllSry2ZsZx7amVAfMq9EaXqxE'
+          });
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should refresh token', async() => {
+        const timeout = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+        // wait for one second to be sure that generated tokens will be different
+        await timeout(1000);
+
+        const { body } = await request(app)
+          .post('/auth/refresh-token')
+          .send({
+            refreshToken: tokens.userTokens.refreshToken
+          });
+
+        // token should be a valid token
+        expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
+        expect(body.data).to.have.property('expiration');
+
+        // tokens should differ
+        expect(body.data.token).not.to.equal(tokens.userTokens.token);
       });
     });
   });
