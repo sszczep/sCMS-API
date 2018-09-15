@@ -4,6 +4,7 @@ const mongoose = require('../database');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const config = require('../config.js');
+const CustomError = require('../utils/CustomError.js');
 
 const User = new mongoose.Schema({
   email: {
@@ -66,7 +67,13 @@ User.methods.validatePassword = async function(password) {
   return await bcrypt.compare(password, this.password);
 };
 
-User.methods.refreshJWTToken = function() {
+User.methods.refreshJWTToken = function(refreshToken) {
+  try {
+    jwt.verify(refreshToken, config.jwtRefreshSecret);
+  } catch(err) {
+    throw new CustomError('InvalidToken', 'Token invalid or expired!', 401);
+  }
+
   // expiration date set to 10 minutes
   const tokenExp = Math.floor(Date.now() / 1000) + (10 * 60);
 

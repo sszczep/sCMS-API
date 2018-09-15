@@ -13,7 +13,7 @@ const refreshToken = async token => {
       throw new CustomError('InvalidRefreshToken', 'Given refresh token is not valid', 406);
     }
 
-    return await user.refreshJWTToken();
+    return user.refreshJWTToken(token);
   } catch(err) {
     throw err;
   }
