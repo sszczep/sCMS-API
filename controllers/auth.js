@@ -7,7 +7,7 @@ const CustomError = require('../utils/CustomError.js');
 
 const refreshToken = async token => {
   try {
-    const user = await UserModel.findOne({ refreshToken: token }).exec();
+    const user = await UserModel.findOne({ refreshTokens: token }).exec();
 
     if(!user) {
       throw new CustomError('InvalidRefreshToken', 'Given refresh token is not valid', 406);

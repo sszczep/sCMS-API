@@ -42,7 +42,7 @@ const User = new mongoose.Schema({
     type: Array,
     default: []
   },
-  refreshToken: String
+  refreshTokens: [ String ]
 });
 
 User.set('toObject', {
@@ -67,36 +67,39 @@ User.methods.validatePassword = async function(password) {
   return await bcrypt.compare(password, this.password);
 };
 
-User.methods.refreshJWTToken = function(refreshToken) {
-  try {
-    jwt.verify(refreshToken, config.jwtRefreshSecret);
-  } catch(err) {
-    throw new CustomError('InvalidToken', 'Token invalid or expired!', 401);
-  }
-
+const generateAccessToken = that => {
   // expiration date set to 10 minutes
   const tokenExp = Math.floor(Date.now() / 1000) + (10 * 60);
 
   const token = jwt.sign({
     exp: tokenExp,
-    _id: this._id,
-    username: this.username,
-    permissions: this.permissions
+    _id: that._id,
+    username: that.username,
+    permissions: that.permissions
   }, config.jwtSecret);
 
   return { token, expiration: tokenExp * 1000 };
 };
 
-User.methods.generateJWTTokens = async function() {
-  // expiration date set to 10 minutes
-  const tokenExp = Math.floor(Date.now() / 1000) + (10 * 60);
+User.methods.refreshJWTToken = async function(refreshToken) {
+  try {
+    jwt.verify(refreshToken, config.jwtRefreshSecret);
+  } catch(err) {
+    const index = this.refreshTokens.indexOf(refreshToken);
 
-  const token = jwt.sign({
-    exp: tokenExp,
-    _id: this._id,
-    username: this.username,
-    permissions: this.permissions
-  }, config.jwtSecret);
+    this.refreshTokens.splice(index, 1);
+    await this.save();
+
+    throw new CustomError('InvalidToken', 'Token invalid or expired!', 401);
+  }
+
+  const token = generateAccessToken(this);
+
+  return token;
+};
+
+User.methods.generateJWTTokens = async function() {
+  const token = generateAccessToken(this);
 
   const refreshToken = jwt.sign({
     _id: this._id
@@ -104,12 +107,12 @@ User.methods.generateJWTTokens = async function() {
     expiresIn: '0.5y'
   });
 
-  this.refreshToken = refreshToken;
+  this.refreshTokens.push(refreshToken);
 
   // store refresh token in database
   await this.save();
 
-  return { token, expiration: tokenExp * 1000, refreshToken };
+  return { ...token, refreshToken };
 };
 
 module.exports = mongoose.model('User', User);
