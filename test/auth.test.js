@@ -296,5 +296,57 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
         expect(body.data.token).not.to.equal(tokens.userTokens.token);
       });
     });
+
+    describe('#POST /auth/logout', () => {
+      it('Should not remove refresh token - empty payload', async() => {
+        const { body } = await request(app)
+          .post('/auth/logout')
+          .send();
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not remove refresh token - invalid refresh token', async() => {
+        const { body } = await request(app)
+          .post('/auth/logout')
+          .send({
+            refreshToken: 'blablabla'
+          });
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not remove refresh token - outdated/wrong refresh token', async() => {
+        const { body } = await request(app)
+          .post('/auth/logout')
+          .send({
+            refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MzcwMDI2MTQsImV4cCI6MTU1Mjc4MTQxNH0.euubuVcQKOiNdTlCqPllSry2ZsZx7amVAfMq9EaXqxE'
+          });
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should remove refresh token', async() => {
+        const { body } = await request(app)
+          .post('/auth/logout')
+          .send({
+            refreshToken: tokens.userTokens.refreshToken
+          });
+
+        expect(body).not.to.have.property('errors');
+      });
+    });
+
+    describe('#POST /auth/refresh-token', () => {
+      it('Should not refresh token - given token has been already deleted', async() => {
+        const { body } = await request(app)
+          .post('/auth/refresh-token')
+          .send({
+            refreshToken: tokens.userTokens.refreshToken
+          });
+
+        expect(body).to.have.property('errors');
+      });
+    });
   });
 });

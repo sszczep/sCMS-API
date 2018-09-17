@@ -81,16 +81,35 @@ const generateAccessToken = that => {
   return { token, expiration: tokenExp * 1000 };
 };
 
+User.methods.removeRefreshToken = async function(refreshToken) {
+  try {
+    const index = this.refreshTokens.indexOf(refreshToken);
+
+    if(index === -1) {
+      throw new CustomError('InvalidRefreshToken', 'Given refresh token is not valid', 406);
+    }
+
+    this.refreshTokens.splice(index, 1);
+    await this.save();
+  } catch(err) {
+    throw err;
+  }
+};
+
 User.methods.refreshJWTToken = async function(refreshToken) {
   try {
     jwt.verify(refreshToken, config.jwtRefreshSecret);
   } catch(err) {
     const index = this.refreshTokens.indexOf(refreshToken);
 
+    if(index === -1) {
+      throw new CustomError('InvalidRefreshToken', 'Given refresh token is not valid', 406);
+    }
+
     this.refreshTokens.splice(index, 1);
     await this.save();
 
-    throw new CustomError('InvalidToken', 'Token invalid or expired!', 401);
+    throw new CustomError('InvalidRefreshToken', 'Refresh token invalid or expired!', 406);
   }
 
   const token = generateAccessToken(this);
@@ -107,10 +126,13 @@ User.methods.generateJWTTokens = async function() {
     expiresIn: '0.5y'
   });
 
-  this.refreshTokens.push(refreshToken);
+  // if refresh token already is in database (was generated less than a second after previous one) don't store new one
+  if(!this.refreshTokens.includes(refreshToken)) {
+    this.refreshTokens.push(refreshToken);
 
-  // store refresh token in database
-  await this.save();
+    // store refresh token in database
+    await this.save();
+  }
 
   return { ...token, refreshToken };
 };

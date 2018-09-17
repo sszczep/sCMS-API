@@ -5,6 +5,20 @@ const config = require('../config.js');
 const UserModel = require('../models/users.js');
 const CustomError = require('../utils/CustomError.js');
 
+const removeRefreshToken = async token => {
+  try {
+    const user = await UserModel.findOne({ refreshTokens: token }).exec();
+
+    if(!user) {
+      throw new CustomError('InvalidRefreshToken', 'Given refresh token is not valid', 406);
+    }
+
+    return user.removeRefreshToken(token);
+  } catch(err) {
+    throw err;
+  }
+};
+
 const refreshToken = async token => {
   try {
     const user = await UserModel.findOne({ refreshTokens: token }).exec();
@@ -63,6 +77,7 @@ const decodeToken = async token => {
 };
 
 module.exports = {
+  removeRefreshToken,
   refreshToken,
   validateCredentialsAndReturnTokens,
   checkAuthorizationHeaderAndReturnToken,

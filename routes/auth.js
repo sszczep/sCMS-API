@@ -196,4 +196,38 @@ router.post('/refresh-token',
     }
   });
 
+/**
+ * @api {post} /auth/logout Logout
+ * @apiName Logout
+ * @apiGroup Auth
+ *
+ * @apiParam (JSON Payload) {String} refreshToken Refresh token
+ *
+ * @apiSuccess (Success 200) {null} null No response data
+ *
+ * @apiUse ErrorObject
+ */
+
+router.post('/logout',
+  [
+    bodyValidation('refreshToken')
+      .trim()
+      .exists({ checkFalsy: true })
+      .withMessage('You need to specify refreshToken')
+      .isJWT()
+      .withMessage('Specified refreshToken is not valid')
+  ],
+  ValidationErrorHandler,
+  async(req, res, next) => {
+    const { refreshToken } = req.body;
+
+    try {
+      await AuthController.removeRefreshToken(refreshToken);
+
+      return res.sendStatus(200);
+    } catch(err) {
+      return next(err);
+    }
+  });
+
 module.exports = router;
