@@ -180,7 +180,7 @@ router.use(isLogged);
  */
 
 router.post('/',
-  hasPermissions([ 'createPost' ]),
+  hasPermissions([ 'createPosts' ]),
   [
     bodyValidation('title')
       .trim()
