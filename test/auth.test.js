@@ -17,7 +17,7 @@ const pokemonize = string =>
 // will be filled later
 let tokens = {};
 
-module.exports = ({ user, admin }) => new Promise(resolve => {
+module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
   describe('Testing /auth', () => {
     describe('#POST /auth/register', () => {
       it('Should not register - empty payload', async() => {
@@ -214,7 +214,7 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
         expect(body.data).to.have.property('expiration');
       });
 
-      it('Should login both user and admin successfully and return tokens', async() => {
+      it('Should login all users successfully and return tokens', async() => {
         const login = async data => {
           const { body } = await request(app)
             .post('/auth/login')
@@ -237,12 +237,14 @@ module.exports = ({ user, admin }) => new Promise(resolve => {
 
         const userTokens = await login(user);
         const adminTokens = await login(admin);
+        const bloggerTokens = await login(blogger);
 
-        tokens = { userTokens, adminTokens };
+        tokens = { userTokens, adminTokens, bloggerTokens };
 
         return resolve({
           userToken: userTokens.token,
-          adminToken: adminTokens.token
+          adminToken: adminTokens.token,
+          bloggerToken: bloggerTokens.token
         });
       });
     });

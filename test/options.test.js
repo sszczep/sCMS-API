@@ -186,7 +186,7 @@ module.exports = (optionsToCreate, users) => {
 
         expect(Object.keys(body).length).to.equal(0);
 
-        createdOptions = createdOptions.slice(1);
+        createdOptions.splice(0, 1);
       });
     });
 

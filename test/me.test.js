@@ -9,7 +9,7 @@ chai.use(chaiJWT);
 
 const { expect } = chai;
 
-module.exports = (usersToCreate, { userToken, adminToken }) => new Promise(resolve => {
+module.exports = (usersToCreate, { userToken, adminToken, bloggerToken }) => new Promise(resolve => {
   describe('Testing /me', () => {
     describe('#GET /me', () => {
       it('Should not get user details - no Authorization Hedaer', async() => {
@@ -38,7 +38,7 @@ module.exports = (usersToCreate, { userToken, adminToken }) => new Promise(resol
         expect(body).to.have.property('errors');
       });
 
-      it('Should get both users details', async() => {
+      it('Should get all users details', async() => {
         const getDetails = async data => {
           const { body } = await request(app)
             .get('/me')
@@ -69,9 +69,15 @@ module.exports = (usersToCreate, { userToken, adminToken }) => new Promise(resol
           ...usersToCreate.admin
         });
 
+        const blogger = await getDetails({
+          token: bloggerToken,
+          ...usersToCreate.blogger
+        });
+
         return resolve({
           user,
-          admin
+          admin,
+          blogger
         });
       });
     });

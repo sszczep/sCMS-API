@@ -44,7 +44,7 @@ module.exports = (posts, users) => {
         expect(body.data.posts[0].url).to.equal(posts[0].url);
 
         // author testing
-        expect(body.data.posts[0].author.fullname).to.equal(users.admin.fullname);
+        expect(body.data.posts[0].author.fullname).to.equal(users.blogger.fullname);
 
         // response should not contain _id and __v
         expect(body.data.posts[0]).not.to.have.property('_id');
@@ -53,12 +53,12 @@ module.exports = (posts, users) => {
         expect(body.data.posts[0].author).not.to.have.property('__v');
       });
 
-      it('Should return five posts and one user', async() => {
+      it(`Should return ${posts.length} posts and 1 user`, async() => {
         const { body } = await request(app)
           .get(`/autocomplete/test`)
           .send();
 
-        expect(body.data.posts.length).to.equal(5);
+        expect(body.data.posts.length).to.equal(posts.length);
         expect(body.data.users.length).to.equal(1);
 
         body.data.posts.reverse();
@@ -71,7 +71,7 @@ module.exports = (posts, users) => {
           expect(body.data.posts[i].url).to.equal(posts[i].url);
 
           // author testing
-          expect(body.data.posts[i].author.fullname).to.equal(users.admin.fullname);
+          expect(body.data.posts[i].author.fullname).to.equal(users.blogger.fullname);
 
           // response should not contain _id and __v
           expect(body.data.posts[i]).not.to.have.property('_id');

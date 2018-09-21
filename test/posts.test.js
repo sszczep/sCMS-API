@@ -62,7 +62,7 @@ module.exports = (postsToCreate, users) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/posts')
           .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MzY1MTI4NjMsInVzZXJuYW1lIjoidXNlciIsInBlcm1pc3Npb25zIjpbXSwiaWF0IjoxNTM2NTEyMjYzfQ.jAWMZ8x-cXQfiOL689omiOq8JU1E8JteYYFyhVtjUdo')
-          .send();
+          .send(postsToCreate[0]);
 
         expect(body).to.have.property('errors');
       });
@@ -80,7 +80,7 @@ module.exports = (postsToCreate, users) => new Promise(resolve => {
         const publish = async data => {
           const { body } = await request(app)
             .post('/posts')
-            .set('Authorization', `Bearer ${users.admin.token}`)
+            .set('Authorization', `Bearer ${users.blogger.token}`)
             .send(data);
 
           expect(body.data.title).to.equal(data.title);
@@ -92,8 +92,8 @@ module.exports = (postsToCreate, users) => new Promise(resolve => {
           expect(body.data).to.have.property('url');
 
           // author testing
-          expect(body.data.author.fullname).to.equal(users.admin.fullname);
-          expect(body.data.author.username).to.equal(users.admin.username);
+          expect(body.data.author.fullname).to.equal(users.blogger.fullname);
+          expect(body.data.author.username).to.equal(users.blogger.username);
 
           // response should not contain _id and __v
           expect(body.data).not.to.have.property('_id');
@@ -107,14 +107,12 @@ module.exports = (postsToCreate, users) => new Promise(resolve => {
         const promises = postsToCreate.map(elem => publish(elem));
 
         createdPosts = await Promise.all(promises);
-
-        resolve(createdPosts);
       });
 
       it('Should not publish new post - there is a post with this title', async() => {
         const { body } = await request(app)
           .post('/posts')
-          .set('Authorization', `Bearer ${users.user.token}`)
+          .set('Authorization', `Bearer ${users.admin.token}`)
           .send(postsToCreate[0]);
 
         expect(body).to.have.property('errors');
@@ -153,8 +151,8 @@ module.exports = (postsToCreate, users) => new Promise(resolve => {
         expect(body.data.url).to.equal(createdPosts[0].url);
 
         // author testing
-        expect(body.data.author.fullname).to.equal(users.admin.fullname);
-        expect(body.data.author.username).to.equal(users.admin.username);
+        expect(body.data.author.fullname).to.equal(users.blogger.fullname);
+        expect(body.data.author.username).to.equal(users.blogger.username);
 
         // response should not contain _id and __v
         expect(body.data).not.to.have.property('_id');
@@ -181,8 +179,8 @@ module.exports = (postsToCreate, users) => new Promise(resolve => {
           expect(body.data[i].url).to.equal(createdPosts[i].url);
 
           // author testing
-          expect(body.data[i].author.fullname).to.equal(users.admin.fullname);
-          expect(body.data[i].author.username).to.equal(users.admin.username);
+          expect(body.data[i].author.fullname).to.equal(users.blogger.fullname);
+          expect(body.data[i].author.username).to.equal(users.blogger.username);
 
           // response should not contain _id and __v
           expect(body.data[i]).not.to.have.property('_id');
@@ -209,8 +207,8 @@ module.exports = (postsToCreate, users) => new Promise(resolve => {
           expect(body.data[i].url).to.equal(createdPosts[i].url);
 
           // author testing
-          expect(body.data[i].author.fullname).to.equal(users.admin.fullname);
-          expect(body.data[i].author.username).to.equal(users.admin.username);
+          expect(body.data[i].author.fullname).to.equal(users.blogger.fullname);
+          expect(body.data[i].author.username).to.equal(users.blogger.username);
 
           // response should not contain _id and __v
           expect(body.data[i]).not.to.have.property('_id');
@@ -240,8 +238,8 @@ module.exports = (postsToCreate, users) => new Promise(resolve => {
           expect(body.data[i].url).to.equal(toCompare[i].url);
 
           // author testing
-          expect(body.data[i].author.fullname).to.equal(users.admin.fullname);
-          expect(body.data[i].author.username).to.equal(users.admin.username);
+          expect(body.data[i].author.fullname).to.equal(users.blogger.fullname);
+          expect(body.data[i].author.username).to.equal(users.blogger.username);
 
           // response should not contain _id and __v
           expect(body.data[i]).not.to.have.property('_id');
@@ -271,8 +269,8 @@ module.exports = (postsToCreate, users) => new Promise(resolve => {
           expect(body.data[i].url).to.equal(toCompare[i].url);
 
           // author testing
-          expect(body.data[i].author.fullname).to.equal(users.admin.fullname);
-          expect(body.data[i].author.username).to.equal(users.admin.username);
+          expect(body.data[i].author.fullname).to.equal(users.blogger.fullname);
+          expect(body.data[i].author.username).to.equal(users.blogger.username);
 
           // response should not contain _id and __v
           expect(body.data[i]).not.to.have.property('_id');
@@ -280,6 +278,75 @@ module.exports = (postsToCreate, users) => new Promise(resolve => {
           expect(body.data[i].author).not.to.have.property('_id');
           expect(body.data[i].author).not.to.have.property('__v');
         }
+      });
+    });
+    describe('#DELETE /posts/:url', () => {
+      it('Should not delete post - no Authorization Header', async() => {
+        const { body } = await request(app)
+          .delete(`/posts/${createdPosts[0].url}`)
+          .send();
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not delete post - invalid token', async() => {
+        const { body } = await request(app)
+          .delete(`/posts/${createdPosts[0].url}`)
+          .set('Authorization', 'Bearer blablabla')
+          .send();
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not delete post - outdated/wrong token', async() => {
+        const { body } = await request(app)
+          .delete(`/posts/${createdPosts[0].url}`)
+          .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MzY1MTI4NjMsInVzZXJuYW1lIjoidXNlciIsInBlcm1pc3Npb25zIjpbXSwiaWF0IjoxNTM2NTEyMjYzfQ.jAWMZ8x-cXQfiOL689omiOq8JU1E8JteYYFyhVtjUdo')
+          .send();
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not delete post - user has no permission', async() => {
+        const { body } = await request(app)
+          .delete(`/posts/${createdPosts[0].url}`)
+          .set('Authorization', `Bearer ${users.user.token}`)
+          .send();
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should not delete post - there is no post with given url', async() => {
+        const { body } = await request(app)
+          .delete('/posts/i-dont-exist')
+          .set('Authorization', `Bearer ${users.admin.token}`)
+          .send();
+
+        expect(body).to.have.property('errors');
+      });
+
+      it('Should delete post - it is blogger\'s post', async() => {
+        const { body } = await request(app)
+          .delete(`/posts/${createdPosts[0].url}`)
+          .set('Authorization', `Bearer ${users.blogger.token}`)
+          .send();
+
+        expect(Object.keys(body).length).to.equal(0);
+
+        createdPosts.splice(0, 1);
+      });
+
+      it('Should delete post - admin has a permission to do that', async() => {
+        const { body } = await request(app)
+          .delete(`/posts/${createdPosts[0].url}`)
+          .set('Authorization', `Bearer ${users.admin.token}`)
+          .send();
+
+        expect(Object.keys(body).length).to.equal(0);
+
+        createdPosts.splice(0, 1);
+
+        resolve(createdPosts);
       });
     });
   });

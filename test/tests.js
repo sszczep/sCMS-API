@@ -12,6 +12,14 @@ const usersToCreate = {
     permissions: [ '*' ]
   },
 
+  blogger: {
+    email: 'blogger@domain.com',
+    username: 'blogger',
+    password: 'bloggerPassword',
+    fullname: 'Blogger account',
+    permissions: [ 'createPosts' ]
+  },
+
   user: {
     email: 'test@domain.com',
     username: 'test',
@@ -92,6 +100,11 @@ before(async() => {
   // create admin account
   await UserController.registerUser({
     toCreate: usersToCreate.admin
+  });
+
+  // create blogger account
+  await UserController.registerUser({
+    toCreate: usersToCreate.blogger
   });
 });
 
