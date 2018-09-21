@@ -290,7 +290,7 @@ router.delete('/:url',
           throw new CustomError('NoPostFound', 'Could not find post with given url', 404);
         }
 
-        if(data.author.toString() !== author.toString()) {
+        if(data.author.toString() !== author) {
           throw new CustomError('NoPermission', 'This post does not belong to you', 403);
         }
       }

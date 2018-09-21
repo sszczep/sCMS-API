@@ -100,14 +100,7 @@ User.methods.refreshJWTToken = async function(refreshToken) {
   try {
     jwt.verify(refreshToken, config.jwtRefreshSecret);
   } catch(err) {
-    const index = this.refreshTokens.indexOf(refreshToken);
-
-    if(index === -1) {
-      throw new CustomError('InvalidRefreshToken', 'Given refresh token is not valid', 406);
-    }
-
-    this.refreshTokens.splice(index, 1);
-    await this.save();
+    await this.removeRefreshToken(refreshToken);
 
     throw new CustomError('InvalidRefreshToken', 'Refresh token invalid or expired!', 406);
   }
