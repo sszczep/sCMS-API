@@ -6,7 +6,7 @@ const { body: bodyValidation, param: paramValidation } = require('express-valida
 const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js');
 const isLogged = require('../middlewares/isLogged.js');
 const hasPermissions = require('../middlewares/hasPermissions.js');
-const OptionsController = require('../controllers/options.js');
+const OptionController = require('../controllers/options.js');
 const CustomError = require('../utils/CustomError.js');
 
 /**
@@ -23,7 +23,7 @@ const CustomError = require('../utils/CustomError.js');
 
 router.get('/', async(req, res, next) => {
   try {
-    const data = await OptionsController.getOptions({
+    const data = await OptionController.getOptions({
       select: '-_id key value',
       options: {
         lean: true
@@ -78,7 +78,7 @@ router.post('/',
     const { key, value } = req.body;
 
     try {
-      const data = await OptionsController.createOption({
+      const data = await OptionController.createOption({
         toCreate: {
           key,
           value
@@ -131,7 +131,7 @@ router.put('/:key',
     const { newValue } = req.body;
 
     try {
-      const data = await OptionsController.updateOption({
+      const data = await OptionController.updateOption({
         conditions: {
           key
         },
@@ -180,10 +180,10 @@ router.delete('/:key',
     const { key } = req.params;
 
     try {
-      const data = await OptionsController.deleteOption({ key });
+      const data = await OptionController.deleteOption({ key });
 
       if(!data) {
-        throw new CustomError('NoOptionFound', 'Could not find option with given id', 404);
+        throw new CustomError('NoOptionFound', 'Could not find option with given key', 404);
       }
 
       return res.sendStatus(200);

@@ -7,6 +7,7 @@ const ValidationErrorHandler = require('../middlewares/ValidationErrorHandler.js
 const isLogged = require('../middlewares/isLogged.js');
 const hasPermissions = require('../middlewares/hasPermissions.js');
 const PostController = require('../controllers/posts.js');
+const UserController = require('../controllers/users.js');
 const CustomError = require('../utils/CustomError.js');
 
 /**
@@ -244,6 +245,63 @@ router.post('/',
         .json({
           data
         });
+    } catch(err) {
+      return next(err);
+    }
+  });
+
+/**
+  * @api {delete} /posts/:url Delete post
+  * @apiName DeleteOption
+  * @apiGroup Options
+  *
+  * @apiUse AuthorizationHeader
+  *
+  * @apiParam (Route Parameter) {String} url Url
+  *
+  * @apiSuccess (Success 200) {null} null No response data
+  *
+  * @apiUse ErrorObject
+  */
+
+router.delete('/:url',
+  paramValidation('url')
+    .trim()
+    .exists({ checkFalsy: true })
+    .withMessage('You need to specify url'),
+  ValidationErrorHandler,
+  async(req, res, next) => {
+    const { url } = req.params;
+    const { _id: author, permissions: userPermissions } = req.user;
+
+    try {
+      if(!UserController.hasPermissions(userPermissions, [ 'deletePosts ' ])) {
+        const data = await PostController.getSinglePost({
+          conditions: {
+            url
+          },
+          select: '-_id author',
+          options: {
+            lean: true
+          }
+        });
+
+        if(!data) {
+          throw new CustomError('NoPostFound', 'Could not find post with given url', 404);
+        }
+
+        if(!data.author === author) {
+          throw new CustomError('NoPermission', 'This post does not belong to you', 403);
+        }
+      }
+
+      const data = await PostController.deletePost({ url });
+
+      if(!data) {
+        throw new CustomError('NoPostFound', 'Could not find post with given url', 404);
+      }
+
+      return res.sendStatus(200);
     } catch(err) {
       return next(err);
     }

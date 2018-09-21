@@ -27,6 +27,11 @@ const createNewPost = async data => {
   return filterObject(response, data.select);
 };
 
+const deletePost = async data =>
+  await PostModel
+    .findOneAndDelete(data)
+    .exec();
+
 const getPostsCount = async() =>
   await PostModel.estimatedDocumentCount();
 
@@ -50,6 +55,7 @@ const getPostsList = async data =>
 module.exports = {
   findContaining,
   createNewPost,
+  deletePost,
   getPostsCount,
   getSinglePost,
   getPostsList

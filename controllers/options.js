@@ -27,7 +27,7 @@ const updateOption = async data => {
 
 const deleteOption = async data =>
   await OptionModel
-    .findOneAndRemove(data)
+    .findOneAndDelete(data)
     .exec();
 
 module.exports = {
