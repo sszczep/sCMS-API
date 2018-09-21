@@ -2,6 +2,7 @@
 
 const mongoose = require('../database/index.js');
 const UserController = require('../controllers/users.js');
+const { expect } = require('chai');
 
 const usersToCreate = {
   admin: {
@@ -111,6 +112,26 @@ before(async() => {
 /* eslint global-require: "off"*/
 
 (async function() {
+  describe('Checking test data...', () => {
+    it('There should be users named: user, blogger, admin', () => {
+      expect(usersToCreate).to.have.property('user');
+      expect(usersToCreate).to.have.property('blogger');
+      expect(usersToCreate).to.have.property('admin');
+    });
+
+    it('There should be exactly 5 posts', () => {
+      expect(postsToCreate.length).to.equal(5);
+    });
+
+    it('There should be exactly 2 social links', () => {
+      expect(socialsToCreate.length).to.equal(2);
+    });
+
+    it('There should be exactly 2 options', () => {
+      expect(optionsToCreate.length).to.equal(2);
+    });
+  });
+
   const tokens = await require('./auth.test.js')(usersToCreate);
 
   const users = await require('./me.test.js')(usersToCreate, tokens);

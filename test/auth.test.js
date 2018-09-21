@@ -17,7 +17,7 @@ const pokemonize = string =>
 // will be filled later
 let tokens = {};
 
-module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
+module.exports = users => new Promise(resolve => {
   describe('Testing /auth', () => {
     describe('#POST /auth/register', () => {
       it('Should not register - empty payload', async() => {
@@ -32,7 +32,7 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/register')
           .send({
-            ...user,
+            ...users.user,
             username: undefined
           });
 
@@ -43,7 +43,7 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/register')
           .send({
-            ...user,
+            ...users.user,
             username: 'srt'
           });
 
@@ -54,7 +54,7 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/register')
           .send({
-            ...user,
+            ...users.user,
             password: 'short'
           });
 
@@ -65,7 +65,7 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/register')
           .send({
-            ...user,
+            ...users.user,
             email: 'wrong.email.com'
           });
 
@@ -76,7 +76,7 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/register')
           .send({
-            ...user,
+            ...users.user,
             username: '.:user:.'
           });
 
@@ -87,7 +87,7 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/register')
           .send({
-            ...admin,
+            ...users.admin,
             username: 'uniqueUsername'
           });
 
@@ -98,7 +98,7 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/register')
           .send({
-            ...admin,
+            ...users.admin,
             email: 'unique@email.com'
           });
 
@@ -108,7 +108,7 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
       it('Should register new user', async() => {
         const { body } = await request(app)
           .post('/auth/register')
-          .send(user);
+          .send(users.user);
 
         // token should be a valid token
         expect(body.data.token).to.be.a.jwt; // eslint-disable-line no-unused-expressions
@@ -130,7 +130,7 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/login')
           .send({
-            username: user.username
+            username: users.user.username
           });
 
         expect(body).to.have.property('errors');
@@ -151,7 +151,7 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/login')
           .send({
-            login: user.username,
+            login: users.user.username,
             password: 'wrongPassword'
           });
 
@@ -162,8 +162,8 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/login')
           .send({
-            login: user.email,
-            password: user.password
+            login: users.user.email,
+            password: users.user.password
           });
 
         // token should be a valid token
@@ -176,8 +176,8 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/login')
           .send({
-            login: user.username,
-            password: user.password
+            login: users.user.username,
+            password: users.user.password
           });
 
         // token should be a valid token
@@ -190,8 +190,8 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/login')
           .send({
-            login: pokemonize(user.username),
-            password: user.password
+            login: pokemonize(users.user.username),
+            password: users.user.password
           });
 
         // token should be a valid token
@@ -204,8 +204,8 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
         const { body } = await request(app)
           .post('/auth/login')
           .send({
-            login: pokemonize(user.email),
-            password: user.password
+            login: pokemonize(users.user.email),
+            password: users.user.password
           });
 
         // token should be a valid token
@@ -235,9 +235,9 @@ module.exports = ({ user, admin, blogger }) => new Promise(resolve => {
           };
         };
 
-        const userTokens = await login(user);
-        const adminTokens = await login(admin);
-        const bloggerTokens = await login(blogger);
+        const userTokens = await login(users.user);
+        const adminTokens = await login(users.admin);
+        const bloggerTokens = await login(users.blogger);
 
         tokens = { userTokens, adminTokens, bloggerTokens };
 
